@@ -79,7 +79,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   top:33.33%;left:0;width:35%;height:33.34%;
   background:linear-gradient(90deg,rgba(150,40,40,0.25) 0%,rgba(80,20,20,0.1) 100%);
   border-right:2px solid rgba(200,80,80,0.25);
-  color:rgba(255,130,130,0.8);font-size:clamp(18px,4.5vw,30px);
+  color:rgba(255,130,130,0.8);font-size:clamp(24px,6vw,40px);
 }
 .game-btn.left-btn:active{background:linear-gradient(90deg,rgba(200,60,60,0.5) 0%,rgba(120,30,30,0.3) 100%)}
 
@@ -87,7 +87,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   top:33.33%;right:0;width:35%;height:33.34%;
   background:linear-gradient(270deg,rgba(40,120,40,0.25) 0%,rgba(20,60,20,0.1) 100%);
   border-left:2px solid rgba(80,180,80,0.25);
-  color:rgba(130,255,130,0.8);font-size:clamp(18px,4.5vw,30px);
+  color:rgba(130,255,130,0.8);font-size:clamp(24px,6vw,40px);
 }
 .game-btn.right-btn:active{background:linear-gradient(270deg,rgba(60,180,60,0.5) 0%,rgba(30,100,30,0.3) 100%)}
 
@@ -101,7 +101,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
 .game-btn.center-btn:active{background:radial-gradient(circle,rgba(140,120,40,0.5) 0%,rgba(70,60,20,0.3) 100%)}
 
 .btn-inner{display:flex;flex-direction:column;align-items:center;pointer-events:none;text-shadow:0 0 8px rgba(255,255,255,0.15)}
-.btn-label{font-size:clamp(10px,2.5vw,14px);margin-top:4px;opacity:0.75}
+.btn-label{font-size:clamp(11px,2.8vw,15px);margin-top:5px;opacity:0.8}
 .btn-sublabel{font-size:clamp(8px,1.8vw,11px);margin-top:2px;opacity:0.45}
 
 /* ===== フリックモード ===== */
@@ -118,11 +118,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   border:2px solid rgba(180,160,60,0.25);
 }
 .flick-center-inner{color:rgba(255,230,120,0.7);font-size:clamp(12px,3vw,16px);text-align:center;line-height:1.6}
-.flick-hint{color:rgba(255,255,255,0.2);font-size:11px;position:absolute;pointer-events:none;text-align:center}
-.fh-t{top:8%;left:50%;transform:translateX(-50%);color:rgba(180,180,255,0.35)}
-.fh-b{bottom:8%;left:50%;transform:translateX(-50%);color:rgba(180,180,255,0.35)}
-.fh-l{top:48%;left:4%;color:rgba(255,130,130,0.35)}
-.fh-r{top:48%;right:4%;color:rgba(130,255,130,0.35)}
+.flick-hint{color:rgba(255,255,255,0.25);font-size:12px;position:absolute;pointer-events:none;text-align:center}
+.fh-t{top:8%;left:50%;transform:translateX(-50%);color:rgba(180,180,255,0.4)}
+.fh-b{bottom:8%;left:50%;transform:translateX(-50%);color:rgba(180,180,255,0.4)}
+.fh-l{top:48%;left:4%;color:rgba(255,130,130,0.4)}
+.fh-r{top:48%;right:4%;color:rgba(130,255,130,0.4)}
 
 /* ===== チェック画面 ===== */
 #check-screen{background:#0a0a0a;overflow-y:auto;padding:20px;justify-content:flex-start;z-index:120}
@@ -203,13 +203,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
       <div class="btn-inner"><span>▲</span><span class="btn-label">上</span></div>
     </div>
     <div class="game-btn left-btn" id="gbtn-left">
-      <div class="btn-inner"><span>✕</span><span class="btn-label">いいえ</span></div>
+      <div class="btn-inner"><span>◀</span><span class="btn-label">いいえ</span></div>
     </div>
     <div class="game-btn center-btn" id="gbtn-center-touch">
       <div class="btn-inner"><span>🔄</span><span class="btn-label">もう一度聞く</span><span class="btn-sublabel">長押し → メニュー</span></div>
     </div>
     <div class="game-btn right-btn" id="gbtn-right">
-      <div class="btn-inner"><span>◯</span><span class="btn-label">はい</span></div>
+      <div class="btn-inner"><span>▶</span><span class="btn-label">はい</span></div>
     </div>
     <div class="game-btn bottom-btn" id="gbtn-down">
       <div class="btn-inner"><span>▼</span><span class="btn-label">下</span></div>
@@ -224,10 +224,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
     </div>
     <div class="flick-zone fz-right" id="fz-right"></div>
     <div class="flick-zone fz-bottom" id="fz-bottom"></div>
-    <div class="flick-hint fh-t">▲上</div>
-    <div class="flick-hint fh-b">▼下</div>
-    <div class="flick-hint fh-l">◀左</div>
-    <div class="flick-hint fh-r">右▶</div>
+    <div class="flick-hint fh-t">▲ 上</div>
+    <div class="flick-hint fh-b">▼ 下</div>
+    <div class="flick-hint fh-l">◀ いいえ</div>
+    <div class="flick-hint fh-r">はい ▶</div>
   </div>
 </div>
 
@@ -251,15 +251,15 @@ var settings={inputMode:'touch',speechRate:1.0};
 var saveData={cleared:[],chapter:'',scene:'',line:0,flags:{}};
 
 var CH={
-  ochipu:  {name:'おちぷー',      img:'picture/ochi.png',     p:0.7, ro:0},
-  chibabu: {name:'ちばぶ',        img:'picture/chiba.png',    p:1.2, ro:0.1},
-  yukkin:  {name:'ゆっきん',      img:'picture/yuuki.png',    p:0.9, ro:0.05},
-  debucorn:{name:'デブコーン',    img:'picture/debu.png',     p:0.5, ro:-0.15},
-  nobun:   {name:'のぶん',        img:'picture/nobu.png',     p:1.0, ro:-0.05},
-  yocchin: {name:'よっちん',      img:'picture/yochi.png',    p:1.15,ro:0.15},
-  katopan: {name:'かとぱん',      img:'picture/kato.png',     p:1.1, ro:-0.1},
-  edimarcy:{name:'エディマーシー',img:'picture/masahiro.png', p:0.6, ro:0},
-  narrator:{name:'',              img:'',                     p:1.0, ro:0}
+  ochipu:  {name:'おちぷー',      img:'ochi.png',     p:0.7, ro:0},
+  chibabu: {name:'ちばぶ',        img:'chiba.png',    p:1.2, ro:0.1},
+  yukkin:  {name:'ゆっきん',      img:'yuuki.png',    p:0.9, ro:0.05},
+  debucorn:{name:'デブコーン',    img:'debu.png',     p:0.5, ro:-0.15},
+  nobun:   {name:'のぶん',        img:'nobu.png',     p:1.0, ro:-0.05},
+  yocchin: {name:'よっちん',      img:'yochi.png',    p:1.15,ro:0.15},
+  katopan: {name:'かとぱん',      img:'kato.png',     p:1.1, ro:-0.1},
+  edimarcy:{name:'エディマーシー',img:'masahiro.png', p:0.6, ro:0},
+  narrator:{name:'',              img:'',             p:1.0, ro:0}
 };
 
 /* ===== 音声 ===== */
@@ -286,7 +286,7 @@ function pickV(){
   for(var i=0;i<pr.length;i++){for(var j=0;j<allV.length;j++){if(pr[i](allV[j])){selVoice=allV[j];return;}}}
   if(allV.length)selVoice=allV[0];
 }
-function cleanTx(t){return t.replace(/[！!？?。、,\.…\-—~〜「」『』（）()\[\]【】《》・♪♡★☆※＊▼▲◯✕×△□■●○◎←→↑↓🔄\u200B]/g,' ').replace(/\s+/g,' ').trim();}
+function cleanTx(t){return t.replace(/[！!？?。、,\.…\-—~〜「」『』（）()\[\]【】《》・♪♡★☆※＊▼▲◯✕×△□■●○◎←→↑↓🔄▶◀\u200B]/g,' ').replace(/\s+/g,' ').trim();}
 
 function speak(text,charKey,onEnd){
   speechSynthesis.cancel();
@@ -543,13 +543,13 @@ document.addEventListener('DOMContentLoaded',init);
 window.addEventListener('beforeunload',function(){speechSynthesis.cancel();});
 </script>
 
-<!-- 章データ読み込み -->
-<script src="js/chapter1.js"></script>
-<script src="js/chapter2.js"></script>
-<script src="js/chapter3.js"></script>
-<script src="js/chapter4.js"></script>
-<script src="js/chapter5.js"></script>
-<script src="js/chapter6.js"></script>
-<script src="js/chapter7.js"></script>
+<!-- 章データ読み込み（同じ階層） -->
+<script src="chapter1.js"></script>
+<script src="chapter2.js"></script>
+<script src="chapter3.js"></script>
+<script src="chapter4.js"></script>
+<script src="chapter5.js"></script>
+<script src="chapter6.js"></script>
+<script src="chapter7.js"></script>
 </body>
 </html>
