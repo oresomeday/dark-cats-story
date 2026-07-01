@@ -104,7 +104,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
 .btn-label{font-size:clamp(11px,2.8vw,15px);margin-top:5px;opacity:0.8}
 .btn-sublabel{font-size:clamp(8px,1.8vw,11px);margin-top:2px;opacity:0.45}
 
-/* ===== フリックモード（専用画面） ===== */
+/* ===== フリックモード（専用画面・明るく） ===== */
 .flick-overlay{
   position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;
   background:#000;
@@ -114,10 +114,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   text-align:center;pointer-events:none;
 }
 .flick-main-hint{
-  color:rgba(255,255,255,0.12);font-size:14px;line-height:2;
+  color:rgba(255,255,255,0.6);
+  font-size:16px;
+  line-height:2.2;
+  text-shadow:0 0 10px rgba(255,255,255,0.3);
 }
 .flick-sub-hint{
-  color:rgba(255,255,255,0.08);font-size:11px;margin-top:20px;
+  color:rgba(255,200,100,0.5);
+  font-size:13px;
+  margin-top:25px;
+}
+.flick-skip-hint{
+  color:rgba(150,200,255,0.4);
+  font-size:11px;
+  margin-top:15px;
 }
 
 /* ===== チェック画面 ===== */
@@ -221,6 +231,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
         ▼ 下フリック
       </div>
       <div class="flick-sub-hint">長押し → メニューに戻る</div>
+      <div class="flick-skip-hint">タップ → セリフをスキップ</div>
     </div>
   </div>
 </div>
@@ -241,7 +252,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
 <!-- ===== メインスクリプト ===== -->
 <script>
 var CHAPTERS={};
-var settings={inputMode:'flick',speechRate:1.0}; // デフォルトをflickに
+var settings={inputMode:'flick',speechRate:1.0};
 var saveData={cleared:[],chapter:'',scene:'',line:0,flags:{}};
 
 var CH={
@@ -260,7 +271,7 @@ var CH={
 var selVoice=null,allV=[];
 var lastT='',lastC='';
 var isSpeaking=false;
-var canSkip=true; // スキップ可能かどうか
+var canSkip=true;
 var currentOnEnd=null;
 
 function loadVoices(){
@@ -284,10 +295,12 @@ function pickV(){
   if(allV.length)selVoice=allV[0];
 }
 
-// 句読点は残す、その他の記号は削除、「方」を「ほう」に
+// 句読点は残す、記号は削除、漢字の読み置換
 function cleanTx(t){
   return t
     .replace(/方/g,'ほう')
+    .replace(/上/g,'うえ')
+    .replace(/下/g,'した')
     .replace(/[！!？?…\-—~〜「」『』（）()\[\]【】《》・♪♡★☆※＊▼▲◯✕×△□■●○◎←→↑↓🔄▶◀\u200B]/g,'')
     .replace(/\s+/g,' ')
     .trim();
@@ -297,7 +310,7 @@ function speak(text,charKey,onEnd,skipable){
   speechSynthesis.cancel();
   lastT=text;lastC=charKey;
   isSpeaking=true;
-  canSkip=(skipable!==false); // 明示的にfalseでない限りスキップ可能
+  canSkip=(skipable!==false);
   currentOnEnd=onEnd;
   var cl=cleanTx(text);
   if(!cl){isSpeaking=false;if(onEnd)onEnd();return;}
@@ -427,7 +440,7 @@ function playNext(){
   if(curLnIdx<sc.lines.length){
     var ln=sc.lines[curLnIdx];curLnIdx++;
     saveData.line=curLnIdx;autoSave();
-    speak(ln.t,ln.c,function(){setTimeout(playNext,300);},true); // スキップ可能
+    speak(ln.t,ln.c,function(){setTimeout(playNext,300);},true);
   }else{
     isPlayingLines=false;
     sceneEnd(sc);
@@ -448,18 +461,16 @@ function sceneEnd(sc){
     if(sc.choice.left)pr+='。左で、'+sc.choice.left.label;
     if(sc.choice.up)pr+='。上で、'+sc.choice.up.label;
     if(sc.choice.down)pr+='。下で、'+sc.choice.down.label;
-    speak(pr,'narrator',null,false); // 選択肢はスキップ不可
+    speak(pr,'narrator',null,false);
   }
 }
 
 function handleDir(dir){
-  // テストモードでは確認音声を出す
   if(gameTest){
-    var dirNames={up:'上',down:'下',left:'左',right:'右'};
+    var dirNames={up:'うえ',down:'した',left:'ひだり',right:'みぎ'};
     speak(dirNames[dir]+'が押されました','narrator');
     return;
   }
-  // 本編：選択待ちでなければ何もしない
   if(!waitChoice||!curChoice)return;
   var sel=null;
   if(dir==='right'&&curChoice.right)sel=curChoice.right;
@@ -468,10 +479,9 @@ function handleDir(dir){
   else if(dir==='down'&&curChoice.down)sel=curChoice.down;
   if(sel){
     waitChoice=false;
-    // 確認音声なしで直接次のシーンへ
     loadScene(sel.next);
   }else{
-    speak('その方向には選択肢がありません','narrator',null,false);
+    speak('そのほうこうには選択肢がありません','narrator',null,false);
   }
 }
 
@@ -494,7 +504,6 @@ function showGameScr(test){
   }
 }
 
-// タッチモード用：中央ボタン（もう一度聞く＋長押しメニュー）
 function initCenterTouch(){
   var el=document.getElementById('gbtn-center-touch'),tm=null,fired=false;
   function dn(e){e.preventDefault();e.stopPropagation();fired=false;tm=setTimeout(function(){fired=true;speak('メニューに戻ります','narrator',function(){showMenu();});},800);}
@@ -508,12 +517,10 @@ function initCenterTouch(){
   el.addEventListener('mouseleave',cn);
 }
 
-// タッチモード：方向ボタン（タップでスキップも兼ねる）
 function initTouchDirBtn(id,dir){
   var el=document.getElementById(id);
   el.addEventListener('click',function(e){
     e.stopPropagation();
-    // 再生中ならスキップ
     if(isSpeaking&&canSkip&&isPlayingLines){
       skipSpeech();
       return;
@@ -522,7 +529,6 @@ function initTouchDirBtn(id,dir){
   });
 }
 
-// フリックモード用：画面全体でフリックと長押し検知
 function initFlickOverlay(){
   var el=document.getElementById('flick-overlay');
   var sx=0,sy=0,tm=null,fired=false;
@@ -555,14 +561,12 @@ function initFlickOverlay(){
     var dy=e.changedTouches[0].clientY-sy;
     var dist=Math.sqrt(dx*dx+dy*dy);
     if(dist>30){
-      // フリック判定
       if(Math.abs(dx)>Math.abs(dy)){
         handleDir(dx>0?'right':'left');
       }else{
         handleDir(dy>0?'down':'up');
       }
     }else{
-      // タップ：再生中ならスキップ
       if(isSpeaking&&canSkip&&isPlayingLines){
         skipSpeech();
       }
@@ -573,14 +577,11 @@ function initFlickOverlay(){
 }
 
 function initGameBtns(){
-  // タッチモード：方向ボタン
   initTouchDirBtn('gbtn-up','up');
   initTouchDirBtn('gbtn-down','down');
   initTouchDirBtn('gbtn-left','left');
   initTouchDirBtn('gbtn-right','right');
-  // タッチモード：中央ボタン
   initCenterTouch();
-  // フリックモード：画面全体
   initFlickOverlay();
 }
 
@@ -600,7 +601,7 @@ function initOpts(){
   });
   document.getElementById('speed-down').addEventListener('click',function(){settings.speechRate=Math.max(1.0,Math.round((settings.speechRate-0.1)*10)/10);updSpd();saveSets();});
   document.getElementById('speed-up').addEventListener('click',function(){settings.speechRate=Math.min(1.4,Math.round((settings.speechRate+0.1)*10)/10);updSpd();saveSets();});
-  document.getElementById('btn-test-voice').addEventListener('click',function(){speak('テスト音声です。スピードは'+settings.speechRate+'倍です。句読点で、少し間を開けます。悲鳴の方へ向かう。','narrator');});
+  document.getElementById('btn-test-voice').addEventListener('click',function(){speak('テスト音声です。スピードは'+settings.speechRate+'倍です。句読点で、少し間を開けます。上に行く。下に降りる。悲鳴の方へ向かう。','narrator');});
   document.getElementById('btn-option-back').addEventListener('click',showMenu);
 }
 function updSpd(){document.getElementById('speed-display').textContent=settings.speechRate.toFixed(1)+'x';}
@@ -626,7 +627,7 @@ function initChk(){
     yocchin:'いい話があるんだけどさ、ちょっと聞いてくれよ。',
     katopan:'だいじょうぶ、だいじょうぶ。たぶん治る。たぶんね。',
     edimarcy:'車はいつでも出せるぜ。安全運転がモットーだ。',
-    narrator:'これはナレーションの音声テストです。悲鳴の方へ向かう。'
+    narrator:'これはナレーションの音声テストです。上に行く。下に降りる。悲鳴の方へ向かう。'
   };
   for(var k in tl){
     (function(key,line){
