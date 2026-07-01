@@ -51,86 +51,32 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
 .tap-indicator{position:absolute;bottom:8px;right:12px;font-size:12px;color:#666;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 
-/* ===== ゲーム画面 ===== */
 #game-screen{background:#0a0a0f;z-index:100}
 #game-screen.active{display:block}
 .game-btn-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10}
 
-.game-btn{
-  position:absolute;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:background 0.15s;
-}
-.game-btn.top-btn{
-  top:0;left:0;width:100%;height:33.33%;
-  background:linear-gradient(180deg,rgba(60,60,100,0.25) 0%,rgba(30,30,60,0.1) 100%);
-  border-bottom:2px solid rgba(100,100,200,0.25);
-  color:rgba(180,180,255,0.7);font-size:clamp(20px,5vw,34px);
-}
+.game-btn{position:absolute;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:background 0.15s}
+.game-btn.top-btn{top:0;left:0;width:100%;height:33.33%;background:linear-gradient(180deg,rgba(60,60,100,0.25) 0%,rgba(30,30,60,0.1) 100%);border-bottom:2px solid rgba(100,100,200,0.25);color:rgba(180,180,255,0.7);font-size:clamp(20px,5vw,34px)}
 .game-btn.top-btn:active{background:linear-gradient(180deg,rgba(80,80,160,0.5) 0%,rgba(40,40,100,0.3) 100%)}
-
-.game-btn.bottom-btn{
-  bottom:0;left:0;width:100%;height:33.33%;
-  background:linear-gradient(0deg,rgba(60,60,100,0.25) 0%,rgba(30,30,60,0.1) 100%);
-  border-top:2px solid rgba(100,100,200,0.25);
-  color:rgba(180,180,255,0.7);font-size:clamp(20px,5vw,34px);
-}
+.game-btn.bottom-btn{bottom:0;left:0;width:100%;height:33.33%;background:linear-gradient(0deg,rgba(60,60,100,0.25) 0%,rgba(30,30,60,0.1) 100%);border-top:2px solid rgba(100,100,200,0.25);color:rgba(180,180,255,0.7);font-size:clamp(20px,5vw,34px)}
 .game-btn.bottom-btn:active{background:linear-gradient(0deg,rgba(80,80,160,0.5) 0%,rgba(40,40,100,0.3) 100%)}
-
-.game-btn.left-btn{
-  top:33.33%;left:0;width:35%;height:33.34%;
-  background:linear-gradient(90deg,rgba(150,40,40,0.25) 0%,rgba(80,20,20,0.1) 100%);
-  border-right:2px solid rgba(200,80,80,0.25);
-  color:rgba(255,130,130,0.8);font-size:clamp(24px,6vw,40px);
-}
+.game-btn.left-btn{top:33.33%;left:0;width:35%;height:33.34%;background:linear-gradient(90deg,rgba(150,40,40,0.25) 0%,rgba(80,20,20,0.1) 100%);border-right:2px solid rgba(200,80,80,0.25);color:rgba(255,130,130,0.8);font-size:clamp(24px,6vw,40px)}
 .game-btn.left-btn:active{background:linear-gradient(90deg,rgba(200,60,60,0.5) 0%,rgba(120,30,30,0.3) 100%)}
-
-.game-btn.right-btn{
-  top:33.33%;right:0;width:35%;height:33.34%;
-  background:linear-gradient(270deg,rgba(40,120,40,0.25) 0%,rgba(20,60,20,0.1) 100%);
-  border-left:2px solid rgba(80,180,80,0.25);
-  color:rgba(130,255,130,0.8);font-size:clamp(24px,6vw,40px);
-}
+.game-btn.right-btn{top:33.33%;right:0;width:35%;height:33.34%;background:linear-gradient(270deg,rgba(40,120,40,0.25) 0%,rgba(20,60,20,0.1) 100%);border-left:2px solid rgba(80,180,80,0.25);color:rgba(130,255,130,0.8);font-size:clamp(24px,6vw,40px)}
 .game-btn.right-btn:active{background:linear-gradient(270deg,rgba(60,180,60,0.5) 0%,rgba(30,100,30,0.3) 100%)}
-
-.game-btn.center-btn{
-  top:33.33%;left:35%;width:30%;height:33.34%;
-  background:radial-gradient(circle,rgba(80,70,30,0.3) 0%,rgba(40,35,15,0.1) 100%);
-  border:2px solid rgba(180,160,60,0.25);
-  flex-direction:column;
-  color:rgba(255,230,120,0.8);font-size:clamp(14px,3.5vw,22px);
-}
+.game-btn.center-btn{top:33.33%;left:35%;width:30%;height:33.34%;background:radial-gradient(circle,rgba(80,70,30,0.3) 0%,rgba(40,35,15,0.1) 100%);border:2px solid rgba(180,160,60,0.25);flex-direction:column;color:rgba(255,230,120,0.8);font-size:clamp(14px,3.5vw,22px)}
 .game-btn.center-btn:active{background:radial-gradient(circle,rgba(140,120,40,0.5) 0%,rgba(70,60,20,0.3) 100%)}
 
 .btn-inner{display:flex;flex-direction:column;align-items:center;pointer-events:none;text-shadow:0 0 8px rgba(255,255,255,0.15)}
 .btn-label{font-size:clamp(11px,2.8vw,15px);margin-top:5px;opacity:0.8}
 .btn-sublabel{font-size:clamp(8px,1.8vw,11px);margin-top:2px;opacity:0.45}
 
-/* ===== フリックモード（専用画面・明るく） ===== */
-.flick-overlay{
-  position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;
-  background:#000;
-}
-.flick-hint-container{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  text-align:center;pointer-events:none;
-}
-.flick-main-hint{
-  color:rgba(255,255,255,0.6);
-  font-size:16px;
-  line-height:2.2;
-  text-shadow:0 0 10px rgba(255,255,255,0.3);
-}
-.flick-sub-hint{
-  color:rgba(255,200,100,0.5);
-  font-size:13px;
-  margin-top:25px;
-}
-.flick-skip-hint{
-  color:rgba(150,200,255,0.4);
-  font-size:11px;
-  margin-top:15px;
-}
+.flick-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;background:#000}
+.flick-hint-container{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+.flick-main-hint{color:rgba(255,255,255,0.6);font-size:16px;line-height:2.2;text-shadow:0 0 10px rgba(255,255,255,0.3)}
+.flick-sub-hint{color:rgba(255,200,100,0.5);font-size:13px;margin-top:25px}
+.flick-skip-hint{color:rgba(150,200,255,0.4);font-size:11px;margin-top:15px}
 
-/* ===== チェック画面 ===== */
 #check-screen{background:#0a0a0a;overflow-y:auto;padding:20px;justify-content:flex-start;z-index:120}
 .check-title{font-size:20px;color:#cc3333;margin-bottom:15px;text-align:center;width:100%}
 .check-section{margin-bottom:15px;padding:15px;background:rgba(30,30,30,0.8);border-radius:8px;border:1px solid #333;width:100%;max-width:500px}
@@ -144,7 +90,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
 <body>
 <div id="app">
 
-<!-- メニュー -->
 <div class="screen active" id="menu-screen">
   <div class="title-text">闇の居酒屋</div>
   <div class="title-sub">〜 滝下の夜 〜</div>
@@ -153,7 +98,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   <button class="menu-btn" id="btn-syscheck">システムチェック</button>
 </div>
 
-<!-- 章選択 -->
 <div class="screen" id="chapter-select">
   <div class="chapter-title">— 章を選択 —</div>
   <button class="menu-btn" id="btn-prologue">プロローグ</button>
@@ -167,7 +111,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   <button class="back-btn" id="btn-chapter-back">戻る</button>
 </div>
 
-<!-- オプション -->
 <div class="screen" id="option-screen">
   <div class="option-title">オプション</div>
   <div class="option-group">
@@ -189,7 +132,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   <button class="back-btn" id="btn-option-back">戻る</button>
 </div>
 
-<!-- プロローグ -->
 <div class="screen" id="prologue-screen">
   <div class="prologue-scene">
     <div class="chara-image-area"><div id="prologue-img-container"></div></div>
@@ -201,27 +143,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   </div>
 </div>
 
-<!-- ゲーム画面 -->
 <div class="screen" id="game-screen">
-  <!-- タッチモード -->
   <div class="game-btn-overlay hidden" id="touch-overlay">
-    <div class="game-btn top-btn" id="gbtn-up">
-      <div class="btn-inner"><span>▲</span><span class="btn-label">上</span></div>
-    </div>
-    <div class="game-btn left-btn" id="gbtn-left">
-      <div class="btn-inner"><span>◀</span><span class="btn-label">いいえ</span></div>
-    </div>
-    <div class="game-btn center-btn" id="gbtn-center-touch">
-      <div class="btn-inner"><span>🔄</span><span class="btn-label">もう一度聞く</span><span class="btn-sublabel">長押し → メニュー</span></div>
-    </div>
-    <div class="game-btn right-btn" id="gbtn-right">
-      <div class="btn-inner"><span>▶</span><span class="btn-label">はい</span></div>
-    </div>
-    <div class="game-btn bottom-btn" id="gbtn-down">
-      <div class="btn-inner"><span>▼</span><span class="btn-label">下</span></div>
-    </div>
+    <div class="game-btn top-btn" id="gbtn-up"><div class="btn-inner"><span>▲</span><span class="btn-label">上</span></div></div>
+    <div class="game-btn left-btn" id="gbtn-left"><div class="btn-inner"><span>◀</span><span class="btn-label">いいえ</span></div></div>
+    <div class="game-btn center-btn" id="gbtn-center-touch"><div class="btn-inner"><span>🔄</span><span class="btn-label">もう一度聞く</span><span class="btn-sublabel">長押し → メニュー</span></div></div>
+    <div class="game-btn right-btn" id="gbtn-right"><div class="btn-inner"><span>▶</span><span class="btn-label">はい</span></div></div>
+    <div class="game-btn bottom-btn" id="gbtn-down"><div class="btn-inner"><span>▼</span><span class="btn-label">下</span></div></div>
   </div>
-  <!-- フリックモード（専用画面） -->
   <div class="flick-overlay" id="flick-overlay">
     <div class="flick-hint-container">
       <div class="flick-main-hint">
@@ -236,7 +165,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   </div>
 </div>
 
-<!-- システムチェック -->
 <div class="screen" id="check-screen">
   <div class="check-title">システムチェック</div>
   <div class="check-section"><h3>🔊 各キャラ音声</h3><div id="voice-check-btns"></div><div class="check-result" id="voice-result"></div></div>
@@ -249,7 +177,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
 
 </div>
 
-<!-- ===== メインスクリプト ===== -->
 <script>
 var CHAPTERS={};
 var settings={inputMode:'flick',speechRate:1.0};
@@ -273,6 +200,7 @@ var lastT='',lastC='';
 var isSpeaking=false;
 var canSkip=true;
 var currentOnEnd=null;
+var skipLocked=false; // スキップ連打防止
 
 function loadVoices(){
   return new Promise(function(r){
@@ -295,7 +223,6 @@ function pickV(){
   if(allV.length)selVoice=allV[0];
 }
 
-// 句読点は残す、記号は削除、漢字の読み置換
 function cleanTx(t){
   return t
     .replace(/方/g,'ほう')
@@ -311,28 +238,43 @@ function speak(text,charKey,onEnd,skipable){
   lastT=text;lastC=charKey;
   isSpeaking=true;
   canSkip=(skipable!==false);
-  currentOnEnd=onEnd;
+  currentOnEnd=onEnd||null;
   var cl=cleanTx(text);
-  if(!cl){isSpeaking=false;if(onEnd)onEnd();return;}
+  if(!cl){isSpeaking=false;currentOnEnd=null;if(onEnd)onEnd();return;}
   var u=new SpeechSynthesisUtterance(cl);
   if(selVoice)u.voice=selVoice;
   u.lang='ja-JP';
   var c=CH[charKey];
   if(c){u.pitch=Math.min(c.p,1.2);u.rate=Math.max(0.5,settings.speechRate+c.ro);}
   else{u.pitch=1.0;u.rate=settings.speechRate;}
-  u.onend=function(){isSpeaking=false;currentOnEnd=null;if(onEnd)onEnd();};
-  u.onerror=function(){isSpeaking=false;currentOnEnd=null;if(onEnd)onEnd();};
-  speechSynthesis.speak(u);
-}
-
-function skipSpeech(){
-  if(isSpeaking&&canSkip&&currentOnEnd){
-    speechSynthesis.cancel();
+  u.onend=function(){
     isSpeaking=false;
     var cb=currentOnEnd;
     currentOnEnd=null;
-    cb();
-  }
+    // スキップロック解除（次のセリフが始まる準備）
+    skipLocked=false;
+    if(cb)cb();
+  };
+  u.onerror=function(){
+    isSpeaking=false;
+    var cb=currentOnEnd;
+    currentOnEnd=null;
+    skipLocked=false;
+    if(cb)cb();
+  };
+  speechSynthesis.speak(u);
+}
+
+// 1回のタップで今のセリフだけスキップ、連打防止付き
+function skipCurrentLine(){
+  if(!isSpeaking||!canSkip||!currentOnEnd)return;
+  if(skipLocked)return; // 既にスキップ処理中
+  skipLocked=true; // ロック：次のセリフが始まるまで受け付けない
+  speechSynthesis.cancel();
+  isSpeaking=false;
+  var cb=currentOnEnd;
+  currentOnEnd=null;
+  if(cb)cb();
 }
 
 function replay(){if(lastT&&lastC)speak(lastT,lastC);}
@@ -340,7 +282,7 @@ function replay(){if(lastT&&lastC)speak(lastT,lastC);}
 /* ===== 画面管理 ===== */
 function showScr(id){
   speechSynthesis.cancel();
-  isSpeaking=false;
+  isSpeaking=false;skipLocked=false;
   var all=document.querySelectorAll('.screen');
   for(var i=0;i<all.length;i++)all[i].classList.remove('active');
   document.getElementById(id).classList.add('active');
@@ -432,6 +374,7 @@ function loadScene(sk){
   curScKey=sk;curLnIdx=0;waitChoice=false;curChoice=null;
   saveData.scene=sk;saveData.line=0;autoSave();
   isPlayingLines=true;
+  skipLocked=false;
   playNext();
 }
 
@@ -521,8 +464,9 @@ function initTouchDirBtn(id,dir){
   var el=document.getElementById(id);
   el.addEventListener('click',function(e){
     e.stopPropagation();
-    if(isSpeaking&&canSkip&&isPlayingLines){
-      skipSpeech();
+    // セリフ再生中ならスキップ（1回だけ）
+    if(isPlayingLines&&isSpeaking&&canSkip){
+      skipCurrentLine();
       return;
     }
     handleDir(dir);
@@ -548,9 +492,7 @@ function initFlickOverlay(){
     e.preventDefault();
     var dx=e.touches[0].clientX-sx;
     var dy=e.touches[0].clientY-sy;
-    if(Math.sqrt(dx*dx+dy*dy)>20){
-      clearTimeout(tm);
-    }
+    if(Math.sqrt(dx*dx+dy*dy)>20){clearTimeout(tm);}
   },{passive:false});
 
   el.addEventListener('touchend',function(e){
@@ -561,14 +503,13 @@ function initFlickOverlay(){
     var dy=e.changedTouches[0].clientY-sy;
     var dist=Math.sqrt(dx*dx+dy*dy);
     if(dist>30){
-      if(Math.abs(dx)>Math.abs(dy)){
-        handleDir(dx>0?'right':'left');
-      }else{
-        handleDir(dy>0?'down':'up');
-      }
+      // フリック
+      if(Math.abs(dx)>Math.abs(dy)){handleDir(dx>0?'right':'left');}
+      else{handleDir(dy>0?'down':'up');}
     }else{
-      if(isSpeaking&&canSkip&&isPlayingLines){
-        skipSpeech();
+      // タップ：セリフ再生中なら1回スキップ
+      if(isPlayingLines&&isSpeaking&&canSkip){
+        skipCurrentLine();
       }
     }
   },{passive:false});
@@ -587,18 +528,8 @@ function initGameBtns(){
 
 /* ===== オプション ===== */
 function initOpts(){
-  document.getElementById('opt-touch').addEventListener('click',function(){
-    settings.inputMode='touch';
-    this.classList.add('selected');
-    document.getElementById('opt-flick').classList.remove('selected');
-    saveSets();
-  });
-  document.getElementById('opt-flick').addEventListener('click',function(){
-    settings.inputMode='flick';
-    this.classList.add('selected');
-    document.getElementById('opt-touch').classList.remove('selected');
-    saveSets();
-  });
+  document.getElementById('opt-touch').addEventListener('click',function(){settings.inputMode='touch';this.classList.add('selected');document.getElementById('opt-flick').classList.remove('selected');saveSets();});
+  document.getElementById('opt-flick').addEventListener('click',function(){settings.inputMode='flick';this.classList.add('selected');document.getElementById('opt-touch').classList.remove('selected');saveSets();});
   document.getElementById('speed-down').addEventListener('click',function(){settings.speechRate=Math.max(1.0,Math.round((settings.speechRate-0.1)*10)/10);updSpd();saveSets();});
   document.getElementById('speed-up').addEventListener('click',function(){settings.speechRate=Math.min(1.4,Math.round((settings.speechRate+0.1)*10)/10);updSpd();saveSets();});
   document.getElementById('btn-test-voice').addEventListener('click',function(){speak('テスト音声です。スピードは'+settings.speechRate+'倍です。句読点で、少し間を開けます。上に行く。下に降りる。悲鳴の方へ向かう。','narrator');});
@@ -606,13 +537,8 @@ function initOpts(){
 }
 function updSpd(){document.getElementById('speed-display').textContent=settings.speechRate.toFixed(1)+'x';}
 function updOptUI(){
-  if(settings.inputMode==='flick'){
-    document.getElementById('opt-flick').classList.add('selected');
-    document.getElementById('opt-touch').classList.remove('selected');
-  }else{
-    document.getElementById('opt-touch').classList.add('selected');
-    document.getElementById('opt-flick').classList.remove('selected');
-  }
+  if(settings.inputMode==='flick'){document.getElementById('opt-flick').classList.add('selected');document.getElementById('opt-touch').classList.remove('selected');}
+  else{document.getElementById('opt-touch').classList.add('selected');document.getElementById('opt-flick').classList.remove('selected');}
 }
 
 /* ===== システムチェック ===== */
@@ -653,8 +579,7 @@ function initChk(){
 async function init(){
   await loadVoices();
   loadSets();loadSave();
-  updOptUI();
-  updSpd();
+  updOptUI();updSpd();
   document.getElementById('btn-start').addEventListener('click',showChapterSelect);
   document.getElementById('btn-option').addEventListener('click',function(){showScr('option-screen');});
   document.getElementById('btn-syscheck').addEventListener('click',function(){showScr('check-screen');});
@@ -669,7 +594,6 @@ document.addEventListener('DOMContentLoaded',init);
 window.addEventListener('beforeunload',function(){speechSynthesis.cancel();});
 </script>
 
-<!-- 章データ読み込み -->
 <script src="chapter1.js"></script>
 <script src="chapter2.js"></script>
 <script src="chapter3.js"></script>
