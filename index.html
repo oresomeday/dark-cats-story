@@ -163,8 +163,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
   <div class="option-group">
     <div class="option-label">操作方法</div>
     <div class="option-row">
-      <button class="opt-btn selected" id="opt-touch">画面タッチ</button>
-      <button class="opt-btn" id="opt-flick">フリック入力</button>
+      <button class="opt-btn" id="opt-touch">画面タッチ</button>
+      <button class="opt-btn selected" id="opt-flick">フリック入力</button>
     </div>
   </div>
   <div class="option-group">
@@ -194,7 +194,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
 <!-- ゲーム画面 -->
 <div class="screen" id="game-screen">
   <!-- タッチモード -->
-  <div class="game-btn-overlay" id="touch-overlay">
+  <div class="game-btn-overlay hidden" id="touch-overlay">
     <div class="game-btn top-btn" id="gbtn-up">
       <div class="btn-inner"><span>▲</span><span class="btn-label">上</span></div>
     </div>
@@ -212,7 +212,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
     </div>
   </div>
   <!-- フリックモード（専用画面） -->
-  <div class="flick-overlay hidden" id="flick-overlay">
+  <div class="flick-overlay" id="flick-overlay">
     <div class="flick-hint-container">
       <div class="flick-main-hint">
         ▲ 上フリック<br>
@@ -241,7 +241,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
 <!-- ===== メインスクリプト ===== -->
 <script>
 var CHAPTERS={};
-var settings={inputMode:'touch',speechRate:1.0};
+var settings={inputMode:'flick',speechRate:1.0}; // デフォルトをflickに
 var saveData={cleared:[],chapter:'',scene:'',line:0,flags:{}};
 
 var CH={
@@ -259,6 +259,9 @@ var CH={
 /* ===== 音声 ===== */
 var selVoice=null,allV=[];
 var lastT='',lastC='';
+var isSpeaking=false;
+var canSkip=true; // スキップ可能かどうか
+var currentOnEnd=null;
 
 function loadVoices(){
   return new Promise(function(r){
@@ -281,34 +284,50 @@ function pickV(){
   if(allV.length)selVoice=allV[0];
 }
 
-// 句読点は残して間を開ける、その他の記号は削除
+// 句読点は残す、その他の記号は削除、「方」を「ほう」に
 function cleanTx(t){
   return t
+    .replace(/方/g,'ほう')
     .replace(/[！!？?…\-—~〜「」『』（）()\[\]【】《》・♪♡★☆※＊▼▲◯✕×△□■●○◎←→↑↓🔄▶◀\u200B]/g,'')
     .replace(/\s+/g,' ')
     .trim();
 }
 
-function speak(text,charKey,onEnd){
+function speak(text,charKey,onEnd,skipable){
   speechSynthesis.cancel();
   lastT=text;lastC=charKey;
+  isSpeaking=true;
+  canSkip=(skipable!==false); // 明示的にfalseでない限りスキップ可能
+  currentOnEnd=onEnd;
   var cl=cleanTx(text);
-  if(!cl){if(onEnd)onEnd();return;}
+  if(!cl){isSpeaking=false;if(onEnd)onEnd();return;}
   var u=new SpeechSynthesisUtterance(cl);
   if(selVoice)u.voice=selVoice;
   u.lang='ja-JP';
   var c=CH[charKey];
   if(c){u.pitch=Math.min(c.p,1.2);u.rate=Math.max(0.5,settings.speechRate+c.ro);}
   else{u.pitch=1.0;u.rate=settings.speechRate;}
-  u.onend=function(){if(onEnd)onEnd();};
-  u.onerror=function(){if(onEnd)onEnd();};
+  u.onend=function(){isSpeaking=false;currentOnEnd=null;if(onEnd)onEnd();};
+  u.onerror=function(){isSpeaking=false;currentOnEnd=null;if(onEnd)onEnd();};
   speechSynthesis.speak(u);
 }
+
+function skipSpeech(){
+  if(isSpeaking&&canSkip&&currentOnEnd){
+    speechSynthesis.cancel();
+    isSpeaking=false;
+    var cb=currentOnEnd;
+    currentOnEnd=null;
+    cb();
+  }
+}
+
 function replay(){if(lastT&&lastC)speak(lastT,lastC);}
 
 /* ===== 画面管理 ===== */
 function showScr(id){
   speechSynthesis.cancel();
+  isSpeaking=false;
   var all=document.querySelectorAll('.screen');
   for(var i=0;i<all.length;i++)all[i].classList.remove('active');
   document.getElementById(id).classList.add('active');
@@ -384,6 +403,7 @@ function showProLine(){
 var curChKey='',curScKey='',curLnIdx=0;
 var waitChoice=false,curChoice=null;
 var gameTest=false;
+var isPlayingLines=false;
 
 function startChapter(key){
   var ch=CHAPTERS[key];
@@ -398,6 +418,7 @@ function loadScene(sk){
   if(!ch||!ch.scenes[sk]){speak('シーンエラー','narrator');return;}
   curScKey=sk;curLnIdx=0;waitChoice=false;curChoice=null;
   saveData.scene=sk;saveData.line=0;autoSave();
+  isPlayingLines=true;
   playNext();
 }
 
@@ -406,8 +427,11 @@ function playNext(){
   if(curLnIdx<sc.lines.length){
     var ln=sc.lines[curLnIdx];curLnIdx++;
     saveData.line=curLnIdx;autoSave();
-    speak(ln.t,ln.c,function(){setTimeout(playNext,300);});
-  }else{sceneEnd(sc);}
+    speak(ln.t,ln.c,function(){setTimeout(playNext,300);},true); // スキップ可能
+  }else{
+    isPlayingLines=false;
+    sceneEnd(sc);
+  }
 }
 
 function sceneEnd(sc){
@@ -424,21 +448,31 @@ function sceneEnd(sc){
     if(sc.choice.left)pr+='。左で、'+sc.choice.left.label;
     if(sc.choice.up)pr+='。上で、'+sc.choice.up.label;
     if(sc.choice.down)pr+='。下で、'+sc.choice.down.label;
-    speak(pr,'narrator');
+    speak(pr,'narrator',null,false); // 選択肢はスキップ不可
   }
 }
 
 function handleDir(dir){
-  // テストモードでも確認音声は出さない
-  if(gameTest){return;}
+  // テストモードでは確認音声を出す
+  if(gameTest){
+    var dirNames={up:'上',down:'下',left:'左',right:'右'};
+    speak(dirNames[dir]+'が押されました','narrator');
+    return;
+  }
+  // 本編：選択待ちでなければ何もしない
   if(!waitChoice||!curChoice)return;
   var sel=null;
   if(dir==='right'&&curChoice.right)sel=curChoice.right;
   else if(dir==='left'&&curChoice.left)sel=curChoice.left;
   else if(dir==='up'&&curChoice.up)sel=curChoice.up;
   else if(dir==='down'&&curChoice.down)sel=curChoice.down;
-  if(sel){waitChoice=false;speak(sel.label+'を選択','narrator',function(){loadScene(sel.next);});}
-  else{speak('その方向には選択肢がありません','narrator');}
+  if(sel){
+    waitChoice=false;
+    // 確認音声なしで直接次のシーンへ
+    loadScene(sel.next);
+  }else{
+    speak('その方向には選択肢がありません','narrator',null,false);
+  }
 }
 
 /* ===== ゲーム画面 ===== */
@@ -460,9 +494,9 @@ function showGameScr(test){
   }
 }
 
-// タッチモード用：中央ボタン
-function initCenter(id){
-  var el=document.getElementById(id),tm=null,fired=false;
+// タッチモード用：中央ボタン（もう一度聞く＋長押しメニュー）
+function initCenterTouch(){
+  var el=document.getElementById('gbtn-center-touch'),tm=null,fired=false;
   function dn(e){e.preventDefault();e.stopPropagation();fired=false;tm=setTimeout(function(){fired=true;speak('メニューに戻ります','narrator',function(){showMenu();});},800);}
   function up(e){e.preventDefault();e.stopPropagation();clearTimeout(tm);if(!fired)replay();}
   function cn(){clearTimeout(tm);}
@@ -472,6 +506,20 @@ function initCenter(id){
   el.addEventListener('mousedown',dn);
   el.addEventListener('mouseup',up);
   el.addEventListener('mouseleave',cn);
+}
+
+// タッチモード：方向ボタン（タップでスキップも兼ねる）
+function initTouchDirBtn(id,dir){
+  var el=document.getElementById(id);
+  el.addEventListener('click',function(e){
+    e.stopPropagation();
+    // 再生中ならスキップ
+    if(isSpeaking&&canSkip&&isPlayingLines){
+      skipSpeech();
+      return;
+    }
+    handleDir(dir);
+  });
 }
 
 // フリックモード用：画面全体でフリックと長押し検知
@@ -492,7 +540,6 @@ function initFlickOverlay(){
 
   el.addEventListener('touchmove',function(e){
     e.preventDefault();
-    // 少しでも動いたら長押しキャンセル
     var dx=e.touches[0].clientX-sx;
     var dy=e.touches[0].clientY-sy;
     if(Math.sqrt(dx*dx+dy*dy)>20){
@@ -514,8 +561,12 @@ function initFlickOverlay(){
       }else{
         handleDir(dy>0?'down':'up');
       }
+    }else{
+      // タップ：再生中ならスキップ
+      if(isSpeaking&&canSkip&&isPlayingLines){
+        skipSpeech();
+      }
     }
-    // タップは何もしない（もう一度聞く機能なし）
   },{passive:false});
 
   el.addEventListener('touchcancel',function(){clearTimeout(tm);});
@@ -523,33 +574,60 @@ function initFlickOverlay(){
 
 function initGameBtns(){
   // タッチモード：方向ボタン
-  var dirs={'gbtn-up':'up','gbtn-down':'down','gbtn-left':'left','gbtn-right':'right'};
-  for(var id in dirs){
-    (function(d,eid){
-      document.getElementById(eid).addEventListener('click',function(e){e.stopPropagation();handleDir(d);});
-    })(dirs[id],id);
-  }
+  initTouchDirBtn('gbtn-up','up');
+  initTouchDirBtn('gbtn-down','down');
+  initTouchDirBtn('gbtn-left','left');
+  initTouchDirBtn('gbtn-right','right');
   // タッチモード：中央ボタン
-  initCenter('gbtn-center-touch');
+  initCenterTouch();
   // フリックモード：画面全体
   initFlickOverlay();
 }
 
 /* ===== オプション ===== */
 function initOpts(){
-  document.getElementById('opt-touch').addEventListener('click',function(){settings.inputMode='touch';this.classList.add('selected');document.getElementById('opt-flick').classList.remove('selected');saveSets();});
-  document.getElementById('opt-flick').addEventListener('click',function(){settings.inputMode='flick';this.classList.add('selected');document.getElementById('opt-touch').classList.remove('selected');saveSets();});
+  document.getElementById('opt-touch').addEventListener('click',function(){
+    settings.inputMode='touch';
+    this.classList.add('selected');
+    document.getElementById('opt-flick').classList.remove('selected');
+    saveSets();
+  });
+  document.getElementById('opt-flick').addEventListener('click',function(){
+    settings.inputMode='flick';
+    this.classList.add('selected');
+    document.getElementById('opt-touch').classList.remove('selected');
+    saveSets();
+  });
   document.getElementById('speed-down').addEventListener('click',function(){settings.speechRate=Math.max(1.0,Math.round((settings.speechRate-0.1)*10)/10);updSpd();saveSets();});
   document.getElementById('speed-up').addEventListener('click',function(){settings.speechRate=Math.min(1.4,Math.round((settings.speechRate+0.1)*10)/10);updSpd();saveSets();});
-  document.getElementById('btn-test-voice').addEventListener('click',function(){speak('テスト音声です。スピードは'+settings.speechRate+'倍です。句読点で、少し間を開けます。','narrator');});
+  document.getElementById('btn-test-voice').addEventListener('click',function(){speak('テスト音声です。スピードは'+settings.speechRate+'倍です。句読点で、少し間を開けます。悲鳴の方へ向かう。','narrator');});
   document.getElementById('btn-option-back').addEventListener('click',showMenu);
 }
 function updSpd(){document.getElementById('speed-display').textContent=settings.speechRate.toFixed(1)+'x';}
+function updOptUI(){
+  if(settings.inputMode==='flick'){
+    document.getElementById('opt-flick').classList.add('selected');
+    document.getElementById('opt-touch').classList.remove('selected');
+  }else{
+    document.getElementById('opt-touch').classList.add('selected');
+    document.getElementById('opt-flick').classList.remove('selected');
+  }
+}
 
 /* ===== システムチェック ===== */
 function initChk(){
   var ct=document.getElementById('voice-check-btns');
-  var tl={ochipu:'ここは俺に任せとけ。まあ、様子見てからだけどな。',chibabu:'人間の体の60パーセントは水でできてるんだぜ。',yukkin:'よーし、ここは賭けだ。勝負だ勝負。',debucorn:'うまいもん食いてえなあ。特製ソースも持ってきたぜ。',nobun:'今日の潮の流れはいいな。大物が釣れそうだ。',yocchin:'いい話があるんだけどさ、ちょっと聞いてくれよ。',katopan:'だいじょうぶ、だいじょうぶ。たぶん治る。たぶんね。',edimarcy:'車はいつでも出せるぜ。安全運転がモットーだ。',narrator:'これはナレーションの音声テストです。句読点で、間が開きます。'};
+  var tl={
+    ochipu:'ここは俺に任せとけ。まあ、様子見てからだけどな。',
+    chibabu:'人間の体の60パーセントは水でできてるんだぜ。',
+    yukkin:'よーし、ここは賭けだ。勝負だ勝負。',
+    debucorn:'うまいもん食いてえなあ。特製ソースも持ってきたぜ。',
+    nobun:'今日の潮の流れはいいな。大物が釣れそうだ。',
+    yocchin:'いい話があるんだけどさ、ちょっと聞いてくれよ。',
+    katopan:'だいじょうぶ、だいじょうぶ。たぶん治る。たぶんね。',
+    edimarcy:'車はいつでも出せるぜ。安全運転がモットーだ。',
+    narrator:'これはナレーションの音声テストです。悲鳴の方へ向かう。'
+  };
   for(var k in tl){
     (function(key,line){
       var b=document.createElement('button');b.className='check-btn';
@@ -561,12 +639,12 @@ function initChk(){
       ct.appendChild(b);
     })(k,tl[k]);
   }
-  document.getElementById('btn-check-touch').addEventListener('click',function(){settings.inputMode='touch';showGameScr(true);});
-  document.getElementById('btn-check-flick').addEventListener('click',function(){settings.inputMode='flick';showGameScr(true);});
+  document.getElementById('btn-check-touch').addEventListener('click',function(){settings.inputMode='touch';updOptUI();showGameScr(true);});
+  document.getElementById('btn-check-flick').addEventListener('click',function(){settings.inputMode='flick';updOptUI();showGameScr(true);});
   document.getElementById('btn-check-prologue').addEventListener('click',startPrologue);
   document.getElementById('btn-check-save').addEventListener('click',function(){saveData.flags.test=Date.now();autoSave();document.getElementById('save-result').textContent='セーブ完了: '+JSON.stringify(saveData);speak('セーブしました','narrator');});
   document.getElementById('btn-check-load').addEventListener('click',function(){if(loadSave()){document.getElementById('save-result').textContent='ロード完了: '+JSON.stringify(saveData);speak('ロードしました','narrator');}else{document.getElementById('save-result').textContent='データなし';speak('セーブデータがありません','narrator');}});
-  document.getElementById('btn-check-reset').addEventListener('click',function(){localStorage.removeItem('mys_save');localStorage.removeItem('mys_sets');saveData={cleared:[],chapter:'',scene:'',line:0,flags:{}};document.getElementById('save-result').textContent='全削除完了';speak('全データを削除しました','narrator');});
+  document.getElementById('btn-check-reset').addEventListener('click',function(){localStorage.removeItem('mys_save');localStorage.removeItem('mys_sets');saveData={cleared:[],chapter:'',scene:'',line:0,flags:{}};settings={inputMode:'flick',speechRate:1.0};updOptUI();updSpd();document.getElementById('save-result').textContent='全削除完了';speak('全データを削除しました','narrator');});
   document.getElementById('btn-check-back').addEventListener('click',showMenu);
 }
 
@@ -574,7 +652,7 @@ function initChk(){
 async function init(){
   await loadVoices();
   loadSets();loadSave();
-  if(settings.inputMode==='flick'){document.getElementById('opt-flick').classList.add('selected');document.getElementById('opt-touch').classList.remove('selected');}
+  updOptUI();
   updSpd();
   document.getElementById('btn-start').addEventListener('click',showChapterSelect);
   document.getElementById('btn-option').addEventListener('click',function(){showScr('option-screen');});
