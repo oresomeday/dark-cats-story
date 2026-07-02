@@ -101,13 +101,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hi
 <div class="screen" id="chapter-select">
   <div class="chapter-title">— 章を選択 —</div>
   <button class="menu-btn" id="btn-prologue">プロローグ</button>
-  <button class="menu-btn locked" id="btn-ch1">第一章「暗闇の声」</button>
-  <button class="menu-btn locked" id="btn-ch2">第二章「消えた灯り」</button>
-  <button class="menu-btn locked" id="btn-ch3">第三章「疑惑の影」</button>
-  <button class="menu-btn locked" id="btn-ch4">第四章「裏切りの味」</button>
-  <button class="menu-btn locked" id="btn-ch5">第五章「真実の手触り」</button>
-  <button class="menu-btn locked" id="btn-ch6">第六章「最後の賭け」</button>
-  <button class="menu-btn locked" id="btn-ch7">第七章「闇の果て」</button>
+  <button class="menu-btn locked" id="btn-ch1">第一章「最後の乾杯」</button>
+  <button class="menu-btn locked" id="btn-ch2">第二章「血の家系図」</button>
+  <button class="menu-btn locked" id="btn-ch3">第三章「消えた料理人」</button>
+  <button class="menu-btn locked" id="btn-ch4">第四章「地下の祭壇」</button>
+  <button class="menu-btn locked" id="btn-ch5">第五章「告死の遊戯」</button>
+  <button class="menu-btn locked" id="btn-ch6">第六章「黒沼の記憶」</button>
+  <button class="menu-btn locked" id="btn-ch7">第七章「夜明けの選択」</button>
   <button class="back-btn" id="btn-chapter-back">戻る</button>
 </div>
 
@@ -200,7 +200,10 @@ var lastT='',lastC='';
 var isSpeaking=false;
 var canSkip=true;
 var currentOnEnd=null;
-var skipLocked=false; // スキップ連打防止
+
+// スキップ用：タイムスタンプでクールダウン管理
+var lastSkipTime=0;
+var skipCooldown=600; // 600ms間は追加スキップを無視
 
 function loadVoices(){
   return new Promise(function(r){
@@ -251,25 +254,27 @@ function speak(text,charKey,onEnd,skipable){
     isSpeaking=false;
     var cb=currentOnEnd;
     currentOnEnd=null;
-    // スキップロック解除（次のセリフが始まる準備）
-    skipLocked=false;
     if(cb)cb();
   };
   u.onerror=function(){
     isSpeaking=false;
     var cb=currentOnEnd;
     currentOnEnd=null;
-    skipLocked=false;
     if(cb)cb();
   };
   speechSynthesis.speak(u);
 }
 
-// 1回のタップで今のセリフだけスキップ、連打防止付き
+// スキップ：タイムスタンプでクールダウン
 function skipCurrentLine(){
+  var now=Date.now();
+  // クールダウン中なら無視（連打対策）
+  if(now-lastSkipTime<skipCooldown)return;
+  // 再生中でない、スキップ不可、コールバックなしなら無視
   if(!isSpeaking||!canSkip||!currentOnEnd)return;
-  if(skipLocked)return; // 既にスキップ処理中
-  skipLocked=true; // ロック：次のセリフが始まるまで受け付けない
+  
+  // スキップ実行
+  lastSkipTime=now;
   speechSynthesis.cancel();
   isSpeaking=false;
   var cb=currentOnEnd;
@@ -282,7 +287,8 @@ function replay(){if(lastT&&lastC)speak(lastT,lastC);}
 /* ===== 画面管理 ===== */
 function showScr(id){
   speechSynthesis.cancel();
-  isSpeaking=false;skipLocked=false;
+  isSpeaking=false;
+  lastSkipTime=0; // 画面遷移時にリセット
   var all=document.querySelectorAll('.screen');
   for(var i=0;i<all.length;i++)all[i].classList.remove('active');
   document.getElementById(id).classList.add('active');
@@ -365,6 +371,7 @@ function startChapter(key){
   if(!ch){speak('この章はまだ準備中です','narrator');return;}
   curChKey=key;saveData.chapter=key;autoSave();
   showGameScr(false);
+  lastSkipTime=0; // 章開始時にリセット
   speak(ch.title,'narrator',function(){loadScene('start');});
 }
 
@@ -374,7 +381,7 @@ function loadScene(sk){
   curScKey=sk;curLnIdx=0;waitChoice=false;curChoice=null;
   saveData.scene=sk;saveData.line=0;autoSave();
   isPlayingLines=true;
-  skipLocked=false;
+  lastSkipTime=0; // シーン開始時にリセット
   playNext();
 }
 
@@ -464,7 +471,7 @@ function initTouchDirBtn(id,dir){
   var el=document.getElementById(id);
   el.addEventListener('click',function(e){
     e.stopPropagation();
-    // セリフ再生中ならスキップ（1回だけ）
+    // セリフ再生中ならスキップ試行
     if(isPlayingLines&&isSpeaking&&canSkip){
       skipCurrentLine();
       return;
@@ -507,7 +514,7 @@ function initFlickOverlay(){
       if(Math.abs(dx)>Math.abs(dy)){handleDir(dx>0?'right':'left');}
       else{handleDir(dy>0?'down':'up');}
     }else{
-      // タップ：セリフ再生中なら1回スキップ
+      // タップ：スキップ試行
       if(isPlayingLines&&isSpeaking&&canSkip){
         skipCurrentLine();
       }
