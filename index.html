@@ -201,11 +201,8 @@ var isSpeaking=false;
 var canSkip=true;
 var currentOnEnd=null;
 
-// スキップ制御用
-var lastSkipTime=0;      // 最後にスキップした時刻
-var lineStartTime=0;     // 現在のセリフが始まった時刻
-var skipCooldown=500;    // スキップ後のクールダウン
-var lineProtectTime=300; // セリフ開始直後の保護時間
+// スキップ制御：この時刻まではタップ無視
+var skipBlockedUntil=0;
 
 function loadVoices(){
   return new Promise(function(r){
@@ -244,7 +241,6 @@ function speak(text,charKey,onEnd,skipable){
   isSpeaking=true;
   canSkip=(skipable!==false);
   currentOnEnd=onEnd||null;
-  lineStartTime=Date.now(); // セリフ開始時刻を記録
   
   var cl=cleanTx(text);
   if(!cl){isSpeaking=false;currentOnEnd=null;if(onEnd)onEnd();return;}
@@ -269,21 +265,18 @@ function speak(text,charKey,onEnd,skipable){
   speechSynthesis.speak(u);
 }
 
-// スキップ：複数の条件でガード
+// スキップ：2秒間ブロック
 function skipCurrentLine(){
   var now=Date.now();
   
-  // 1. 前回スキップからのクールダウン中は無視
-  if(now-lastSkipTime<skipCooldown)return;
+  // ブロック時間内なら完全無視
+  if(now<skipBlockedUntil)return;
   
-  // 2. セリフ開始直後は無視（連打対策の要）
-  if(now-lineStartTime<lineProtectTime)return;
-  
-  // 3. 再生中でない、スキップ不可、コールバックなしなら無視
+  // 再生中でない、スキップ不可、コールバックなしなら無視
   if(!isSpeaking||!canSkip||!currentOnEnd)return;
   
-  // スキップ実行
-  lastSkipTime=now;
+  // スキップ実行 → 2秒間ブロック
+  skipBlockedUntil=now+2000;
   speechSynthesis.cancel();
   isSpeaking=false;
   var cb=currentOnEnd;
@@ -297,9 +290,7 @@ function replay(){if(lastT&&lastC)speak(lastT,lastC);}
 function showScr(id){
   speechSynthesis.cancel();
   isSpeaking=false;
-  // 画面遷移時にスキップ関連をリセット（未来の時刻で保護）
-  lastSkipTime=Date.now();
-  lineStartTime=Date.now();
+  skipBlockedUntil=Date.now()+2000; // 画面遷移時2秒ブロック
   var all=document.querySelectorAll('.screen');
   for(var i=0;i<all.length;i++)all[i].classList.remove('active');
   document.getElementById(id).classList.add('active');
@@ -382,10 +373,8 @@ function startChapter(key){
   if(!ch){speak('この章はまだ準備中です','narrator');return;}
   curChKey=key;saveData.chapter=key;autoSave();
   showGameScr(false);
-  // 章開始時に保護時間を設定
-  lastSkipTime=Date.now();
-  lineStartTime=Date.now();
-  speak(ch.title,'narrator',function(){loadScene('start');},false); // タイトルはスキップ不可
+  skipBlockedUntil=Date.now()+2000; // 章開始時2秒ブロック
+  speak(ch.title,'narrator',function(){loadScene('start');},false);
 }
 
 function loadScene(sk){
@@ -394,9 +383,7 @@ function loadScene(sk){
   curScKey=sk;curLnIdx=0;waitChoice=false;curChoice=null;
   saveData.scene=sk;saveData.line=0;autoSave();
   isPlayingLines=true;
-  // シーン開始時に保護時間を設定（連打対策の要）
-  lastSkipTime=Date.now();
-  lineStartTime=Date.now();
+  skipBlockedUntil=Date.now()+2000; // シーン開始時2秒ブロック
   playNext();
 }
 
@@ -444,9 +431,7 @@ function handleDir(dir){
   else if(dir==='down'&&curChoice.down)sel=curChoice.down;
   if(sel){
     waitChoice=false;
-    // 選択後、すぐに保護時間を設定
-    lastSkipTime=Date.now();
-    lineStartTime=Date.now();
+    skipBlockedUntil=Date.now()+2000; // 選択後2秒ブロック
     loadScene(sel.next);
   }else{
     speak('そのほうこうには選択肢がありません','narrator',null,false);
