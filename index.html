@@ -3,540 +3,477 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>闇の居酒屋 - ミステリーアドベンチャー</title>
+<title>闇の居酒屋 - 滝下の夜</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hiragino Sans','Meiryo',sans-serif;color:#fff}
-#app{width:100%;height:100%;position:relative}
-.screen{position:absolute;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;justify-content:center;align-items:center;z-index:100}
+body{background:#000;color:#fff;font-family:'Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo',sans-serif;overflow:hidden;width:100vw;height:100vh;touch-action:none}
+#game-container{width:100vw;height:100vh;position:relative;overflow:hidden}
+.screen{display:none;position:absolute;top:0;left:0;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center}
 .screen.active{display:flex}
-#menu-screen{background:linear-gradient(180deg,#0a0a0a 0%,#1a0a0a 50%,#0a0a0a 100%)}
-.title-text{font-size:clamp(24px,6vw,48px);color:#cc3333;text-shadow:0 0 20px rgba(200,0,0,0.5);margin-bottom:10px;letter-spacing:4px}
-.title-sub{font-size:clamp(12px,3vw,18px);color:#888;margin-bottom:40px}
-.menu-btn{width:250px;max-width:80vw;padding:16px 0;margin:8px;font-size:18px;color:#fff;background:rgba(150,30,30,0.3);border:1px solid #cc3333;border-radius:8px;cursor:pointer;transition:all 0.2s;font-family:inherit}
-.menu-btn:active{background:rgba(200,50,50,0.5);transform:scale(1.03)}
-.menu-btn.locked{opacity:0.15;pointer-events:none;border-color:#333;background:rgba(30,30,30,0.3);display:none}
-.menu-btn.cleared{border-color:#338833;background:rgba(30,80,30,0.3)}
-.back-btn{margin-top:20px;padding:12px 40px;font-size:16px;color:#fff;background:rgba(80,80,80,0.4);border:1px solid #666;border-radius:8px;cursor:pointer;font-family:inherit}
-#chapter-select{overflow-y:auto;padding:20px 0;background:linear-gradient(180deg,#0a0a0a 0%,#0a0a1a 50%,#0a0a0a 100%)}
-.chapter-title{font-size:22px;color:#cc3333;margin-bottom:25px;letter-spacing:2px}
-#option-screen{background:rgba(0,0,0,0.97);z-index:110;overflow-y:auto;padding:30px 0}
-.option-title{font-size:24px;color:#cc3333;margin-bottom:30px}
-.option-group{width:300px;max-width:85vw;margin-bottom:25px}
-.option-label{font-size:14px;color:#aaa;margin-bottom:8px}
-.option-row{display:flex;gap:10px}
-.opt-btn{flex:1;padding:12px 8px;font-size:14px;color:#ccc;background:rgba(60,60,60,0.5);border:1px solid #555;border-radius:6px;cursor:pointer;font-family:inherit;transition:all 0.2s}
-.opt-btn.selected{background:rgba(150,30,30,0.5);border-color:#cc3333;color:#fff}
-.speed-display{text-align:center;font-size:22px;color:#fff;margin:10px 0}
-.speed-controls{display:flex;justify-content:center;gap:20px;align-items:center}
-.speed-btn{width:50px;height:50px;font-size:24px;color:#fff;background:rgba(100,30,30,0.4);border:1px solid #cc3333;border-radius:50%;cursor:pointer;font-family:inherit}
-#prologue-screen{background:#0a0a0a;z-index:100}
-.prologue-scene{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:20px;position:relative;width:100%}
-.chara-image-area{flex:1;display:flex;justify-content:center;align-items:center;min-height:150px}
-.chara-image{max-width:200px;max-height:250px;width:auto;height:auto;object-fit:contain;border-radius:8px;border:2px solid #333}
-.chara-placeholder{width:150px;height:180px;background:rgba(50,50,50,0.5);border:2px dashed #555;border-radius:8px;display:flex;justify-content:center;align-items:center;color:#666;font-size:14px;text-align:center}
-.dialogue-box{background:rgba(0,0,0,0.85);border:1px solid #444;border-radius:8px;padding:15px 20px;min-height:100px;position:relative}
-.speaker-name{font-size:14px;color:#cc3333;margin-bottom:6px;font-weight:bold}
-.dialogue-text{font-size:16px;line-height:1.6;color:#eee}
-.tap-indicator{position:absolute;bottom:8px;right:12px;font-size:12px;color:#666;animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-#game-screen{background:#0a0a0f;z-index:100}
-#game-screen.active{display:block}
-.game-btn-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10}
-.game-btn{position:absolute;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:background 0.15s}
-.game-btn.top-btn{top:0;left:0;width:100%;height:33.33%;background:linear-gradient(180deg,rgba(60,60,100,0.25) 0%,rgba(30,30,60,0.1) 100%);border-bottom:2px solid rgba(100,100,200,0.25);color:rgba(180,180,255,0.7);font-size:clamp(20px,5vw,34px)}
-.game-btn.bottom-btn{bottom:0;left:0;width:100%;height:33.33%;background:linear-gradient(0deg,rgba(60,60,100,0.25) 0%,rgba(30,30,60,0.1) 100%);border-top:2px solid rgba(100,100,200,0.25);color:rgba(180,180,255,0.7);font-size:clamp(20px,5vw,34px)}
-.game-btn.left-btn{top:33.33%;left:0;width:35%;height:33.34%;background:linear-gradient(90deg,rgba(150,40,40,0.25) 0%,rgba(80,20,20,0.1) 100%);border-right:2px solid rgba(200,80,80,0.25);color:rgba(255,130,130,0.8);font-size:clamp(24px,6vw,40px)}
-.game-btn.right-btn{top:33.33%;right:0;width:35%;height:33.34%;background:linear-gradient(270deg,rgba(40,120,40,0.25) 0%,rgba(20,60,20,0.1) 100%);border-left:2px solid rgba(80,180,80,0.25);color:rgba(130,255,130,0.8);font-size:clamp(24px,6vw,40px)}
-.game-btn.center-btn{top:33.33%;left:35%;width:30%;height:33.34%;background:radial-gradient(circle,rgba(80,70,30,0.3) 0%,rgba(40,35,15,0.1) 100%);border:2px solid rgba(180,160,60,0.25);flex-direction:column;color:rgba(255,230,120,0.8);font-size:clamp(14px,3.5vw,22px)}
-.btn-inner{display:flex;flex-direction:column;align-items:center;pointer-events:none;text-shadow:0 0 8px rgba(255,255,255,0.15)}
-.btn-label{font-size:clamp(11px,2.8vw,15px);margin-top:5px;opacity:0.8}
-.btn-sublabel{font-size:clamp(8px,1.8vw,11px);margin-top:2px;opacity:0.45}
-.flick-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;background:#000}
-.flick-hint-container{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
-.flick-main-hint{color:rgba(255,255,255,0.6);font-size:16px;line-height:2.2;text-shadow:0 0 10px rgba(255,255,255,0.3)}
-.flick-sub-hint{color:rgba(255,200,100,0.5);font-size:13px;margin-top:25px}
-.flick-skip-hint{color:rgba(150,200,255,0.4);font-size:11px;margin-top:15px}
-#check-screen{background:#0a0a0a;overflow-y:auto;padding:20px;justify-content:flex-start;z-index:120}
-.check-title{font-size:20px;color:#cc3333;margin-bottom:15px;text-align:center;width:100%}
-.check-section{margin-bottom:15px;padding:15px;background:rgba(30,30,30,0.8);border-radius:8px;border:1px solid #333;width:100%;max-width:500px}
-.check-section h3{font-size:14px;color:#cc3333;margin-bottom:10px}
-.check-btn{padding:10px 14px;margin:4px;font-size:13px;color:#fff;background:rgba(100,30,30,0.4);border:1px solid #cc3333;border-radius:6px;cursor:pointer;font-family:inherit}
-.check-result{margin-top:8px;font-size:12px;color:#aaa;min-height:20px;word-break:break-all}
-.hidden{display:none!important}
+#menu-screen{background:linear-gradient(180deg,#0a0a0a 0%,#1a0a00 50%,#0a0a0a 100%)}
+.game-title{font-size:clamp(28px,6vw,52px);text-align:center;color:#ff6600;text-shadow:0 0 20px rgba(255,102,0,0.5),0 0 40px rgba(255,0,0,0.3);margin-bottom:40px;letter-spacing:4px;animation:titleGlow 3s ease-in-out infinite}
+.subtitle{font-size:clamp(14px,3vw,24px);color:#cc9966;letter-spacing:6px}
+@keyframes titleGlow{0%,100%{text-shadow:0 0 20px rgba(255,102,0,0.5),0 0 40px rgba(255,0,0,0.3)}50%{text-shadow:0 0 30px rgba(255,102,0,0.8),0 0 60px rgba(255,0,0,0.5)}}
+.menu-btn{display:block;width:220px;padding:15px 30px;margin:10px auto;font-size:20px;color:#fff;background:linear-gradient(180deg,#333 0%,#1a1a1a 100%);border:1px solid #555;border-radius:8px;cursor:pointer;transition:all 0.3s;font-family:inherit}
+.menu-btn:hover{background:linear-gradient(180deg,#555 0%,#333 100%);border-color:#ff6600;box-shadow:0 0 15px rgba(255,102,0,0.3)}
+.menu-btn:active{transform:scale(0.95)}
+.menu-btn.small-btn{width:180px;padding:10px 20px;font-size:16px}
+.menu-btn.danger{border-color:#ff3333}
+.menu-btn.danger:hover{box-shadow:0 0 15px rgba(255,0,0,0.3)}
+.menu-btn:disabled{opacity:0.3;cursor:not-allowed}
+.chapter-btn{width:260px}
+.chapter-btn.locked{opacity:0.15;pointer-events:none}
+#option-screen{background:#111;padding:20px;overflow-y:auto}
+#option-screen h2{margin-bottom:20px;color:#ff6600;font-size:28px}
+.option-group{margin:12px 0;text-align:center;width:90%;max-width:400px}
+.option-group label{display:block;margin-bottom:8px;font-size:16px;color:#ccc}
+.option-group input[type="range"]{width:100%;accent-color:#ff6600}
+.option-group select{width:100%;padding:8px;font-size:14px;background:#222;color:#fff;border:1px solid #555;border-radius:4px;margin-bottom:8px}
+.char-voice-list{width:90%;max-width:400px;margin:10px 0}
+.char-voice-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;margin:4px 0;background:#1a1a1a;border:1px solid #333;border-radius:6px}
+.char-voice-item span{font-size:14px;color:#ccc}
+.char-voice-item button{padding:6px 14px;font-size:13px;background:#333;color:#ff9933;border:1px solid #555;border-radius:4px;cursor:pointer;font-family:inherit}
+.char-voice-item button:hover{background:#555;border-color:#ff6600}
+#prologue-screen{background:#000}
+#prologue-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#1a0a00 0%,#0d0d0d 100%)}
+#char-image-container{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);width:clamp(120px,30vw,200px);height:clamp(120px,30vw,200px);z-index:2}
+#char-image{width:100%;height:100%;object-fit:cover;border-radius:50%;border:3px solid #ff6600;display:none}
+#char-name-box{position:absolute;bottom:170px;left:50%;transform:translateX(-50%);background:rgba(255,102,0,0.8);color:#fff;padding:4px 20px;border-radius:4px;font-size:16px;font-weight:bold;z-index:3;display:none;white-space:nowrap}
+#subtitle-box{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);width:90%;max-width:600px;background:rgba(0,0,0,0.85);color:#fff;padding:20px 25px;border-radius:8px;font-size:clamp(16px,3.5vw,20px);line-height:1.6;text-align:center;z-index:3;border:1px solid #333;min-height:60px;display:none}
+#prologue-tap-area{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;cursor:pointer}
+#game-screen{background:#000;flex-direction:column}
+#dark-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:#000;z-index:1}
+#game-text{position:relative;z-index:2;width:90%;max-width:500px;text-align:center;font-size:clamp(16px,3.5vw,20px);line-height:1.8;color:#ddd;padding:20px;min-height:100px;display:flex;align-items:center;justify-content:center;flex-direction:column}
+#choice-display{position:relative;z-index:2;width:90%;max-width:400px;text-align:center;font-size:clamp(14px,3vw,18px);color:#ff9933;padding:10px;min-height:80px}
+.choice-item{margin:5px 0;padding:5px;color:#ff9933}
+.choice-item.highlight{color:#ffcc00;font-weight:bold;text-shadow:0 0 10px rgba(255,204,0,0.5)}
+#flick-area{position:absolute;bottom:0;left:0;width:100%;height:100%;z-index:5}
+#flick-guide{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:#666;font-size:clamp(11px,2.5vw,14px);text-align:center;line-height:1.6;pointer-events:none}
+#countdown-display{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;color:#ff0000;z-index:100;display:none;text-shadow:0 0 30px rgba(255,0,0,0.8);font-weight:bold}
+.fade-in{animation:fadeIn 0.5s ease-in}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+::-webkit-scrollbar{display:none}
+@media(min-width:769px){#flick-guide{color:#555}}
 </style>
 </head>
 <body>
-<div id="app">
-
-<div class="screen active" id="menu-screen">
-  <div class="title-text">闇の居酒屋</div>
-  <div class="title-sub">〜 滝下の夜 〜</div>
-  <button class="menu-btn" id="btn-start">スタート</button>
-  <button class="menu-btn" id="btn-option">オプション</button>
-  <button class="menu-btn" id="btn-syscheck">システムチェック</button>
-</div>
-
-<div class="screen" id="chapter-select">
-  <div class="chapter-title">— 章を選択 —</div>
-  <button class="menu-btn" id="btn-prologue">プロローグ</button>
-  <button class="menu-btn locked" id="btn-ch1">第一章「最後の乾杯」</button>
-  <button class="menu-btn locked" id="btn-ch2">第二章「血の家系図」</button>
-  <button class="menu-btn locked" id="btn-ch3">第三章「消えた料理人」</button>
-  <button class="menu-btn locked" id="btn-ch4">第四章「地下の祭壇」</button>
-  <button class="menu-btn locked" id="btn-ch5">第五章「告死の遊戯」</button>
-  <button class="menu-btn locked" id="btn-ch6">第六章「黒沼の記憶」</button>
-  <button class="menu-btn locked" id="btn-ch7">第七章「夜明けの選択」</button>
-  <button class="back-btn" id="btn-chapter-back">戻る</button>
-</div>
-
-<div class="screen" id="option-screen">
-  <div class="option-title">オプション</div>
-  <div class="option-group">
-    <div class="option-label">操作方法</div>
-    <div class="option-row">
-      <button class="opt-btn" id="opt-touch">画面タッチ</button>
-      <button class="opt-btn selected" id="opt-flick">フリック入力</button>
+<div id="game-container">
+  <div id="menu-screen" class="screen active">
+    <h1 class="game-title">闇の居酒屋<br><span class="subtitle">― 滝下の夜 ―</span></h1>
+    <div id="menu-buttons">
+      <button id="start-btn" class="menu-btn">スタート</button>
+      <button id="option-btn" class="menu-btn">オプション</button>
+    </div>
+    <div id="chapter-select" style="display:none;">
+      <h2 style="text-align:center;color:#ff6600;margin-bottom:20px;">章選択</h2>
+      <div id="chapter-list"></div>
+      <button id="back-menu-btn" class="menu-btn small-btn" style="margin-top:20px;">戻る</button>
     </div>
   </div>
-  <div class="option-group">
-    <div class="option-label">音声スピード</div>
-    <div class="speed-controls">
-      <button class="speed-btn" id="speed-down">−</button>
-      <div class="speed-display" id="speed-display">1.0x</div>
-      <button class="speed-btn" id="speed-up">＋</button>
+  <div id="option-screen" class="screen">
+    <h2>オプション</h2>
+    <div class="option-group">
+      <label>音声速度: <span id="speed-val">1.0</span></label>
+      <input type="range" id="speech-speed" min="0.5" max="1.2" step="0.05" value="1.0">
     </div>
-  </div>
-  <button class="menu-btn" id="btn-test-voice">テスト音声を再生</button>
-  <button class="back-btn" id="btn-option-back">戻る</button>
-</div>
-
-<div class="screen" id="prologue-screen">
-  <div class="prologue-scene">
-    <div class="chara-image-area"><div id="prologue-img-container"></div></div>
-    <div class="dialogue-box">
-      <div class="speaker-name" id="prologue-speaker"></div>
-      <div class="dialogue-text" id="prologue-text"></div>
-      <div class="tap-indicator">▼ タップで次へ</div>
+    <div class="option-group">
+      <label>音声選択:</label>
+      <select id="voice-select"></select>
+      <button id="test-voice-btn" class="menu-btn small-btn">テスト再生</button>
     </div>
-  </div>
-</div>
-
-<div class="screen" id="game-screen">
-  <div class="game-btn-overlay hidden" id="touch-overlay">
-    <div class="game-btn top-btn" id="gbtn-up"><div class="btn-inner"><span>▲</span><span class="btn-label">上</span></div></div>
-    <div class="game-btn left-btn" id="gbtn-left"><div class="btn-inner"><span>◀</span><span class="btn-label">いいえ</span></div></div>
-    <div class="game-btn center-btn" id="gbtn-center-touch"><div class="btn-inner"><span>🔄</span><span class="btn-label">もう一度聞く</span><span class="btn-sublabel">長押し → メニュー</span></div></div>
-    <div class="game-btn right-btn" id="gbtn-right"><div class="btn-inner"><span>▶</span><span class="btn-label">はい</span></div></div>
-    <div class="game-btn bottom-btn" id="gbtn-down"><div class="btn-inner"><span>▼</span><span class="btn-label">下</span></div></div>
-  </div>
-  <div class="flick-overlay" id="flick-overlay">
-    <div class="flick-hint-container">
-      <div class="flick-main-hint">▲ 上フリック<br>◀ 左フリック（いいえ）<br>▶ 右フリック（はい）<br>▼ 下フリック</div>
-      <div class="flick-sub-hint">長押し → メニューに戻る</div>
-      <div class="flick-skip-hint">タップ → セリフをスキップ</div>
+    <div class="option-group"><label>キャラクター音声確認:</label></div>
+    <div class="char-voice-list" id="char-voice-list"></div>
+    <div class="option-group">
+      <button id="clear-save-btn" class="menu-btn small-btn danger">セーブデータ削除</button>
     </div>
+    <button id="option-back-btn" class="menu-btn" style="margin-top:15px;">戻る</button>
   </div>
-</div>
-
-<div class="screen" id="check-screen">
-  <div class="check-title">システムチェック</div>
-  <div class="check-section"><h3>🔊 各キャラ音声</h3><div id="voice-check-btns"></div><div class="check-result" id="voice-result"></div></div>
-  <div class="check-section"><h3>🎮 タッチモード</h3><button class="check-btn" id="btn-check-touch">テスト</button></div>
-  <div class="check-section"><h3>👆 フリックモード</h3><button class="check-btn" id="btn-check-flick">テスト</button></div>
-  <div class="check-section"><h3>💾 セーブ / ロード</h3><button class="check-btn" id="btn-check-save">セーブ</button><button class="check-btn" id="btn-check-load">ロード</button><button class="check-btn" id="btn-check-reset">全削除</button><div class="check-result" id="save-result"></div></div>
-  <button class="back-btn" id="btn-check-back">戻る</button>
-</div>
-
+  <div id="prologue-screen" class="screen">
+    <div id="prologue-bg"></div>
+    <div id="char-image-container"><img id="char-image" src="" alt=""></div>
+    <div id="char-name-box"></div>
+    <div id="subtitle-box"></div>
+    <div id="prologue-tap-area"></div>
+  </div>
+  <div id="game-screen" class="screen">
+    <div id="dark-overlay"></div>
+    <div id="game-text"></div>
+    <div id="choice-display"></div>
+    <div id="flick-area"><div id="flick-guide"></div></div>
+  </div>
+  <div id="countdown-display"></div>
 </div>
 
 <script>
-var CHAPTERS={};
-var settings={inputMode:'flick',speechRate:1.0};
-var saveData={cleared:[],chapter:'',scene:'',line:0,flags:{}};
+const Game={
+  currentScreen:'menu',currentChapter:null,scriptIndex:0,script:[],choices:null,
+  isSpeaking:false,isChoice:false,voices:[],selectedVoice:null,speechRate:1.0,
+  saveData:{prologueCleared:false,chaptersCleared:[false,false,false,false,false,false,false],flags:{}},
+  touchStartX:0,touchStartY:0,touchStartTime:0,longPressTimer:null,isLongPress:false,
+  speakId:0,autoAdvanceTimer:null,countdownTimer:null,countdownInterval:null,
+  audioCtx:null,
+  isMobile:/Android|iPhone|iPad|iPod|webOS|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent),
 
-var CH={
-  ochipu:  {name:'おちぷー',      img:'ochi.png',     p:0.7, ro:0},
-  chibabu: {name:'ちばぶ',        img:'chiba.png',    p:1.2, ro:0.1},
-  yukkin:  {name:'ゆっきん',      img:'yuuki.png',    p:0.9, ro:0.05},
-  debucorn:{name:'デブコーン',    img:'debu.png',     p:0.5, ro:-0.15},
-  nobun:   {name:'のぶん',        img:'nobu.png',     p:1.0, ro:-0.05},
-  yocchin: {name:'よっちん',      img:'yochi.png',    p:1.15,ro:0.15},
-  katopan: {name:'かとぱん',      img:'kato.png',     p:1.1, ro:-0.1},
-  edimarcy:{name:'エディマーシー',img:'masahiro.png', p:0.6, ro:0},
-  narrator:{name:'',              img:'',             p:1.0, ro:0}
-};
+  characters:{
+    'おちぷー':{image:'ochi.png',pitch:1.2,rate:1.15,volume:1.0,
+      lyingPitch:1.15,lyingRate:1.3,
+      testLine:'うわっ、おれはいかないぞ。おまえがさきにいけよ。おれはしんちょうなだけだ。'},
+    'ちばぶ':{image:'chiba.png',pitch:0.95,rate:0.85,volume:0.9,
+      lyingPitch:0.85,lyingRate:0.75,
+      testLine:'ちなみに、にんげんののうは、やく、せんよんひゃくぐらむあるらしいよ。'},
+    'ゆっきん':{image:'yuuki.png',pitch:1.05,rate:1.1,volume:1.0,
+      lyingPitch:1.15,lyingRate:1.2,
+      testLine:'よし、かけようぜ。まけたやつが、ぜんいんぶん、おごりな。'},
+    'デブコーン':{image:'debu.png',pitch:0.55,rate:0.75,volume:1.0,
+      lyingPitch:0.65,lyingRate:0.85,
+      testLine:'おれのとくせいりょうり、くってみろよ。たぶん、おなかはこわさない。'},
+    'のぶん':{image:'nobu.png',pitch:0.85,rate:0.9,volume:0.85,
+      lyingPitch:0.75,lyingRate:0.8,
+      testLine:'きょう、おおものつったんだ。さしみにしたら、さいこうだぜ。'},
+    'よっちん':{image:'yochi.png',pitch:1.1,rate:1.0,volume:0.95,
+      lyingPitch:1.2,lyingRate:1.15,
+      testLine:'しんじてくれよ。おれは、ともだちをだますようなやつじゃない。'},
+    'かとぱん':{image:'kato.png',pitch:0.75,rate:0.95,volume:0.9,
+      lyingPitch:0.85,lyingRate:1.05,
+      testLine:'いしゃとして、いっておく。のみすぎは、からだにわるいぞ。'},
+    'エディマーシー':{image:'masahiro.png',pitch:0.5,rate:0.7,volume:1.0,
+      lyingPitch:0.6,lyingRate:0.8,
+      testLine:'おれは、うんてんせんもんだ。くるまのそとは、よくわからん。'},
+    'ナレーション':{image:null,pitch:0.9,rate:0.9,volume:1.0,
+      lyingPitch:0.9,lyingRate:0.9,
+      testLine:'やみのなかで、ものがたりがはじまる。'}
+  },
 
-/* ===== 音声 ===== */
-var selVoice=null,allV=[];
-var lastT='',lastC='';
-var isSpeaking=false;
-var canSkip=true;
-var currentOnEnd=null;
+  init(){
+    this.loadSave();this.initVoices();this.bindEvents();this.showScreen('menu');this.updateChapterList();
+    try{this.audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  },
 
-// 強力なスキップ保護：この時刻まではいかなるスキップ入力も受け付けない
-var skipBlockedUntil=0;
+  initVoices(){
+    const load=()=>{this.voices=speechSynthesis.getVoices();this.populateVoiceSelect();this.buildCharVoiceList();};
+    speechSynthesis.onvoiceschanged=load;setTimeout(load,100);load();
+  },
 
-function loadVoices(){
-  return new Promise(function(r){
-    allV=speechSynthesis.getVoices();
-    if(allV.length>0){pickV();r();}
-    else{speechSynthesis.onvoiceschanged=function(){allV=speechSynthesis.getVoices();pickV();r();};}
-  });
-}
-function pickV(){
-  var pr=[
-    function(v){return v.name.indexOf('Google')>=0&&v.lang.indexOf('ja')===0},
-    function(v){return v.name.indexOf('Nanami')>=0},
-    function(v){return v.name.indexOf('Microsoft')>=0&&v.lang.indexOf('ja')===0},
-    function(v){return v.name.indexOf('Kyoko')>=0},
-    function(v){return v.name.indexOf('Otoya')>=0},
-    function(v){return !v.localService&&v.lang.indexOf('ja')===0},
-    function(v){return v.lang.indexOf('ja')===0}
-  ];
-  for(var i=0;i<pr.length;i++){for(var j=0;j<allV.length;j++){if(pr[i](allV[j])){selVoice=allV[j];return;}}}
-  if(allV.length)selVoice=allV[0];
-}
+  getHighQualityVoice(){
+    const v=speechSynthesis.getVoices();
+    const tests=[vo=>vo.lang.startsWith('ja')&&vo.name.includes('Google'),vo=>vo.lang.startsWith('ja')&&vo.name.includes('Premium'),vo=>vo.lang.startsWith('ja')&&vo.name.includes('Enhanced'),vo=>vo.lang.startsWith('ja')&&!vo.localService,vo=>vo.lang.startsWith('ja')];
+    for(const t of tests){const f=v.find(t);if(f)return f;}return v[0]||null;
+  },
 
-function cleanTx(t){
-  return t
-    .replace(/方/g,'ほう')
-    .replace(/上/g,'うえ')
-    .replace(/下/g,'した')
-    .replace(/[！!？?…\-—~〜「」『』（）()\[\]【】《》・♪♡★☆※＊▼▲◯✕×△□■●○◎←→↑↓🔄▶◀\u200B]/g,'')
-    .replace(/\s+/g,' ')
-    .trim();
-}
+  populateVoiceSelect(){
+    const sel=document.getElementById('voice-select');sel.innerHTML='';
+    const ja=this.voices.filter(v=>v.lang.startsWith('ja'));
+    const list=ja.length>0?ja:this.voices;
+    list.forEach(v=>{const o=document.createElement('option');o.value=this.voices.indexOf(v);o.textContent=`${v.name} (${v.lang})`;sel.appendChild(o);});
+    const best=this.getHighQualityVoice();
+    if(best){this.selectedVoice=best;sel.value=this.voices.indexOf(best);}
+  },
 
-function speak(text,charKey,onEnd,skipable){
-  speechSynthesis.cancel();
-  lastT=text;lastC=charKey;
-  isSpeaking=true;
-  canSkip=(skipable!==false);
-  currentOnEnd=onEnd||null;
-  
-  // speakが呼ばれるたびに最低500msはスキップを保護する
-  if(canSkip && Date.now() > skipBlockedUntil){
-    skipBlockedUntil = Date.now() + 500;
-  }
-  
-  var cl=cleanTx(text);
-  if(!cl){isSpeaking=false;currentOnEnd=null;if(onEnd)onEnd();return;}
-  var u=new SpeechSynthesisUtterance(cl);
-  if(selVoice)u.voice=selVoice;
-  u.lang='ja-JP';
-  var c=CH[charKey];
-  if(c){u.pitch=Math.min(c.p,1.2);u.rate=Math.max(0.5,settings.speechRate+c.ro);}
-  else{u.pitch=1.0;u.rate=settings.speechRate;}
-  u.onend=function(){
-    isSpeaking=false;
-    var cb=currentOnEnd;
-    currentOnEnd=null;
-    if(cb)cb();
-  };
-  u.onerror=function(){
-    isSpeaking=false;
-    var cb=currentOnEnd;
-    currentOnEnd=null;
-    if(cb)cb();
-  };
-  speechSynthesis.speak(u);
-}
+  buildCharVoiceList(){
+    const list=document.getElementById('char-voice-list');list.innerHTML='';
+    Object.keys(this.characters).forEach(name=>{
+      const item=document.createElement('div');item.className='char-voice-item';
+      const span=document.createElement('span');span.textContent=name;
+      const btn=document.createElement('button');btn.textContent='▶ 再生';
+      btn.addEventListener('click',()=>{
+        speechSynthesis.cancel();const cd=this.characters[name];
+        const u=new SpeechSynthesisUtterance(cd.testLine);
+        if(this.selectedVoice)u.voice=this.selectedVoice;
+        u.pitch=Math.min(cd.pitch,1.2);u.rate=cd.rate*this.speechRate;u.volume=cd.volume||1.0;u.lang='ja-JP';
+        speechSynthesis.speak(u);
+      });
+      item.appendChild(span);item.appendChild(btn);list.appendChild(item);
+    });
+  },
 
-function skipCurrentLine(){
-  // ブロック時間中なら完全無視
-  if(Date.now() < skipBlockedUntil) return;
-  if(!isSpeaking || !canSkip || !currentOnEnd) return;
-  
-  // スキップ実行：次のセリフのために再びブロック時間を設ける
-  skipBlockedUntil = Date.now() + 1000; 
-  speechSynthesis.cancel();
-  isSpeaking=false;
-  var cb=currentOnEnd;
-  currentOnEnd=null;
-  if(cb)cb();
-}
+  // ===== 音声再生 =====
+  speak(text,character,callback,options={}){
+    speechSynthesis.cancel();clearTimeout(this.autoAdvanceTimer);
+    this.speakId++;const myId=this.speakId;
+    const cd=this.characters[character]||this.characters['ナレーション'];
+    const lying=options.lying||false;
+    const pan=options.pan||0; // -1左 0中央 1右
+    const sentences=text.split(/(?<=[。])/g).filter(s=>s.trim());
+    let si=0;this.isSpeaking=true;
 
-function replay(){
-  skipBlockedUntil = Date.now() + 500; // 再生時も少し保護
-  if(lastT&&lastC)speak(lastT,lastC);
-}
+    const finish=()=>{if(myId!==this.speakId)return;this.isSpeaking=false;if(callback)callback();};
 
-/* ===== 画面管理 ===== */
-function showScr(id){
-  speechSynthesis.cancel();
-  isSpeaking=false;
-  skipBlockedUntil = Date.now() + 1500; // 画面切り替え時は長めに保護
-  var all=document.querySelectorAll('.screen');
-  for(var i=0;i<all.length;i++)all[i].classList.remove('active');
-  document.getElementById(id).classList.add('active');
-}
-function showMenu(){showScr('menu-screen');}
-function showChapterSelect(){updateChBtns();showScr('chapter-select');}
+    const speakNext=()=>{
+      if(myId!==this.speakId)return;
+      if(si>=sentences.length){finish();return;}
+      let s=sentences[si];
+      let clean=s.replace(/[「」『』【】（）()！？!?…―─・\.,;:""''～〜♪★☆◆◇■□▲△▽▼※→←↑↓]/g,'');
+      clean=clean.replace(/方/g,'ほう').replace(/上/g,'うえ').replace(/下/g,'した');
+      clean=clean.replace(/[。、]/g,' ').trim();
+      if(!clean){si++;speakNext();return;}
 
-function updateChBtns(){
-  var cl=saveData.cleared||[];
-  var bp=document.getElementById('btn-prologue');
-  bp.classList.remove('locked','cleared');
-  if(cl.indexOf('prologue')>=0)bp.classList.add('cleared');
-  for(var i=1;i<=7;i++){
-    var btn=document.getElementById('btn-ch'+i);
-    var prev=i===1?'prologue':'ch'+(i-1);
-    if(cl.indexOf(prev)>=0){
-      btn.classList.remove('locked');btn.style.display='';
-      if(cl.indexOf('ch'+i)>=0)btn.classList.add('cleared');
-      else btn.classList.remove('cleared');
-    }else{
-      btn.classList.add('locked');btn.classList.remove('cleared');
-    }
-  }
-}
+      const u=new SpeechSynthesisUtterance(clean);
+      if(this.selectedVoice)u.voice=this.selectedVoice;
+      u.pitch=Math.min(lying?cd.lyingPitch:cd.pitch,1.2);
+      u.rate=(lying?cd.lyingRate:cd.rate)*this.speechRate;
+      u.volume=cd.volume||1.0;
+      u.lang='ja-JP';
 
-/* ===== セーブ/ロード ===== */
-function autoSave(){try{localStorage.setItem('mys_save',JSON.stringify(saveData));}catch(e){}}
-function loadSave(){try{var s=localStorage.getItem('mys_save');if(s){saveData=JSON.parse(s);if(!saveData.cleared)saveData.cleared=[];return true;}}catch(e){}return false;}
-function saveSets(){try{localStorage.setItem('mys_sets',JSON.stringify(settings));}catch(e){}}
-function loadSets(){try{var s=localStorage.getItem('mys_sets');if(s)settings=JSON.parse(s);}catch(e){}}
+      u.onend=()=>{if(myId!==this.speakId)return;si++;const d=s.includes('。')?400:150;this.autoAdvanceTimer=setTimeout(speakNext,d);};
+      u.onerror=()=>{if(myId!==this.speakId)return;si++;this.autoAdvanceTimer=setTimeout(speakNext,100);};
+      speechSynthesis.speak(u);
+    };
+    speakNext();
+  },
 
-/* ===== プロローグ ===== */
-var proScript=[
-  {c:'narrator',t:'都内のとある路地裏。居酒屋「滝下」。'},
-  {c:'narrator',t:'幼馴染の8人が、久しぶりに集まった夜のことだった。'},
-  {c:'ochipu',t:'おい、みんな遅えぞ！俺はもう3杯目だからな！'},
-  {c:'chibabu',t:'知ってるか？居酒屋の語源は、酒屋で居座って飲んだことから来てるんだぜ。'},
-  {c:'yukkin',t:'今日は勝負の日だ。じゃんけんで奢りを決めようぜ！'},
-  {c:'debucorn',t:'おい、この刺身の盛り合わせ、俺の特製ソースかけていいか？'},
-  {c:'nobun',t:'この魚、養殖だな。天然物はもっと身が締まってる。'},
-  {c:'yocchin',t:'みんな、実はすごい儲け話があるんだけど、聞かない？'},
-  {c:'katopan',t:'デブコーン、そのソースは体にいいぞ。たぶん。'},
-  {c:'edimarcy',t:'今日は代行だから飲めねえ。ウーロン茶で。'},
-  {c:'narrator',t:'賑やかな笑い声が店内に響く。いつもと変わらない夜のはずだった。'},
-  {c:'narrator',t:'その時だった。'},
-  {c:'narrator',t:'バチンッ！'},
-  {c:'narrator',t:'突然、店内の全ての灯りが消えた。完全な闇。'},
-  {c:'ochipu',t:'うわっ！？な、何だ！？停電か！？'},
-  {c:'chibabu',t:'落ち着け。スマホのライトを…あれ、スマホがない！？'},
-  {c:'yukkin',t:'俺のもだ！さっきまでテーブルにあったのに！'},
-  {c:'narrator',t:'誰かが、全員のスマートフォンを持ち去っていた。'},
-  {c:'narrator',t:'暗闇の中、8人の長い夜が始まる。'}
-];
-var proIdx=0;
+  // 左右パン音声
+  speakPanned(text,character,panDir,callback){
+    this.speak(text,character,callback,{pan:panDir});
+  },
 
-function startPrologue(){proIdx=0;showScr('prologue-screen');showProLine();}
-function showProLine(){
-  if(proIdx>=proScript.length){
-    if(saveData.cleared.indexOf('prologue')<0){saveData.cleared.push('prologue');autoSave();}
-    speak('プロローグ完了','narrator',function(){showChapterSelect();});
-    return;
-  }
-  var ln=proScript[proIdx],c=CH[ln.c];
-  document.getElementById('prologue-speaker').textContent=c.name||'';
-  document.getElementById('prologue-text').textContent=ln.t;
-  var ct=document.getElementById('prologue-img-container');
-  if(c.img){ct.innerHTML='<img class="chara-image" src="'+c.img+'" alt="'+c.name+'" onerror="this.outerHTML=\'<div class=chara-placeholder>'+c.name+'</div>\'">';}
-  else{ct.innerHTML='';}
-  speak(ln.t,ln.c);
-}
+  skipCurrentSpeech(){
+    if(!this.isSpeaking)return;if(this.isChoice)return;
+    speechSynthesis.cancel();clearTimeout(this.autoAdvanceTimer);
+    this.speakId++;this.isSpeaking=false;
+  },
 
-/* ===== 章エンジン ===== */
-var curChKey='',curScKey='',curLnIdx=0;
-var waitChoice=false,curChoice=null;
-var gameTest=false;
-var isPlayingLines=false;
+  // ===== 沈黙の間 =====
+  silence(ms,callback){
+    this.speakId++;const myId=this.speakId;this.isSpeaking=true;
+    this.autoAdvanceTimer=setTimeout(()=>{if(myId!==this.speakId)return;this.isSpeaking=false;if(callback)callback();},ms);
+  },
 
-function startChapter(key){
-  var ch=CHAPTERS[key];
-  if(!ch){speak('この章はまだ準備中です','narrator');return;}
-  curChKey=key;saveData.chapter=key;autoSave();
-  showGameScr(false);
-  speak(ch.title,'narrator',function(){loadScene('start');},false);
-}
-
-function loadScene(sk){
-  var ch=CHAPTERS[curChKey];
-  if(!ch||!ch.scenes[sk]){speak('シーンエラー','narrator');return;}
-  curScKey=sk;curLnIdx=0;waitChoice=false;curChoice=null;
-  saveData.scene=sk;saveData.line=0;autoSave();
-  isPlayingLines=true;
-  playNext();
-}
-
-function playNext(){
-  var sc=CHAPTERS[curChKey].scenes[curScKey];
-  if(curLnIdx<sc.lines.length){
-    var ln=sc.lines[curLnIdx];curLnIdx++;
-    saveData.line=curLnIdx;autoSave();
-    speak(ln.t,ln.c,function(){setTimeout(playNext,300);},true);
-  }else{
-    isPlayingLines=false;
-    sceneEnd(sc);
-  }
-}
-
-function sceneEnd(sc){
-  if(sc.end){
-    if(saveData.cleared.indexOf(curChKey)<0){saveData.cleared.push(curChKey);autoSave();}
-    speak('章クリア。メニューに戻ります。','narrator',function(){showChapterSelect();},false);
-    return;
-  }
-  if(sc.next){setTimeout(function(){loadScene(sc.next);},400);return;}
-  if(sc.choice){
-    curChoice=sc.choice;waitChoice=true;
-    var pr=sc.choice.prompt||'選んでください';
-    if(sc.choice.right)pr+='。右で、'+sc.choice.right.label;
-    if(sc.choice.left)pr+='。左で、'+sc.choice.left.label;
-    if(sc.choice.up)pr+='。上で、'+sc.choice.up.label;
-    if(sc.choice.down)pr+='。下で、'+sc.choice.down.label;
-    speak(pr,'narrator',null,false);
-  }
-}
-
-function handleDir(dir){
-  // 選択肢入力があった瞬間に1.2秒タップを完全に封じる（これが一番重要）
-  skipBlockedUntil = Date.now() + 1200;
-
-  if(gameTest){
-    var dirNames={up:'うえ',down:'した',left:'ひだり',right:'みぎ'};
-    speak(dirNames[dir]+'が押されました','narrator');
-    return;
-  }
-  if(!waitChoice||!curChoice)return;
-  var sel=null;
-  if(dir==='right'&&curChoice.right)sel=curChoice.right;
-  else if(dir==='left'&&curChoice.left)sel=curChoice.left;
-  else if(dir==='up'&&curChoice.up)sel=curChoice.up;
-  else if(dir==='down'&&curChoice.down)sel=curChoice.down;
-  
-  if(sel){
-    waitChoice=false;
-    loadScene(sel.next);
-  }else{
-    speak('そのほうこうには選択肢がありません','narrator',null,false);
-  }
-}
-
-/* ===== ゲーム画面 ===== */
-function showGameScr(test){
-  gameTest=!!test;showScr('game-screen');
-  if(settings.inputMode==='touch'){
-    document.getElementById('touch-overlay').classList.remove('hidden');
-    document.getElementById('flick-overlay').classList.add('hidden');
-  }else{
-    document.getElementById('touch-overlay').classList.add('hidden');
-    document.getElementById('flick-overlay').classList.remove('hidden');
-  }
-}
-
-function initCenterTouch(){
-  var el=document.getElementById('gbtn-center-touch'),tm=null,fired=false;
-  function dn(e){e.preventDefault();e.stopPropagation();fired=false;tm=setTimeout(function(){fired=true;speak('メニューに戻ります','narrator',function(){showMenu();});},800);}
-  function up(e){e.preventDefault();e.stopPropagation();clearTimeout(tm);if(!fired)replay();}
-  el.addEventListener('touchstart',dn,{passive:false});
-  el.addEventListener('touchend',up,{passive:false});
-  el.addEventListener('mousedown',dn);
-  el.addEventListener('mouseup',up);
-}
-
-function initTouchDirBtn(id,dir){
-  var el=document.getElementById(id);
-  el.addEventListener('click',function(e){
-    e.stopPropagation();
-    if(isPlayingLines && isSpeaking && canSkip){
-      skipCurrentLine();
-      return;
-    }
-    handleDir(dir);
-  });
-}
-
-function initFlickOverlay(){
-  var el=document.getElementById('flick-overlay');
-  var sx=0,sy=0,tm=null,fired=false;
-
-  el.addEventListener('touchstart',function(e){
-    e.preventDefault();
-    sx=e.touches[0].clientX; sy=e.touches[0].clientY;
-    fired=false;
-    tm=setTimeout(function(){fired=true;speak('メニューに戻ります','narrator',function(){showMenu();});},800);
-  },{passive:false});
-
-  el.addEventListener('touchend',function(e){
-    e.preventDefault();
-    clearTimeout(tm);
-    if(fired)return;
-    var dx=e.changedTouches[0].clientX-sx;
-    var dy=e.changedTouches[0].clientY-sy;
-    var dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist>30){
-      if(Math.abs(dx)>Math.abs(dy)){handleDir(dx>0?'right':'left');}
-      else{handleDir(dy>0?'down':'up');}
-    }else{
-      if(isPlayingLines && isSpeaking && canSkip){
-        skipCurrentLine();
+  // ===== カウントダウン =====
+  startCountdown(seconds,onTimeout){
+    const cdEl=document.getElementById('countdown-display');
+    cdEl.style.display='block';
+    let remaining=seconds;cdEl.textContent=remaining;
+    this.speak(`${remaining}びょうで、せんたくしてください。`,'ナレーション',()=>{},{});
+    this.countdownInterval=setInterval(()=>{
+      remaining--;
+      if(remaining>0){cdEl.textContent=remaining;}
+      else{
+        cdEl.textContent='0';clearInterval(this.countdownInterval);
+        setTimeout(()=>{cdEl.style.display='none';},500);
+        if(this.isChoice){this.isChoice=false;this.choices=null;
+          document.getElementById('choice-display').innerHTML='';
+          if(onTimeout)onTimeout();
+        }
       }
-    }
-  },{passive:false});
-}
+    },1000);
+  },
 
-function initGameBtns(){
-  initTouchDirBtn('gbtn-up','up');
-  initTouchDirBtn('gbtn-down','down');
-  initTouchDirBtn('gbtn-left','left');
-  initTouchDirBtn('gbtn-right','right');
-  initCenterTouch();
-  initFlickOverlay();
-}
+  stopCountdown(){
+    clearInterval(this.countdownInterval);this.countdownInterval=null;
+    document.getElementById('countdown-display').style.display='none';
+  },
 
-function initOpts(){
-  document.getElementById('opt-touch').addEventListener('click',function(){settings.inputMode='touch';this.classList.add('selected');document.getElementById('opt-flick').classList.remove('selected');saveSets();});
-  document.getElementById('opt-flick').addEventListener('click',function(){settings.inputMode='flick';this.classList.add('selected');document.getElementById('opt-touch').classList.remove('selected');saveSets();});
-  document.getElementById('speed-down').addEventListener('click',function(){settings.speechRate=Math.max(1.0,Math.round((settings.speechRate-0.1)*10)/10);updSpd();saveSets();});
-  document.getElementById('speed-up').addEventListener('click',function(){settings.speechRate=Math.min(1.4,Math.round((settings.speechRate+0.1)*10)/10);updSpd();saveSets();});
-  document.getElementById('btn-test-voice').addEventListener('click',function(){speak('テスト音声です。スピードは'+settings.speechRate+'倍です。上に行く。下に降りる。','narrator');});
-  document.getElementById('btn-option-back').addEventListener('click',showMenu);
-}
-function updSpd(){document.getElementById('speed-display').textContent=settings.speechRate.toFixed(1)+'x';}
-function updOptUI(){
-  if(settings.inputMode==='flick'){document.getElementById('opt-flick').classList.add('selected');document.getElementById('opt-touch').classList.remove('selected');}
-  else{document.getElementById('opt-touch').classList.add('selected');document.getElementById('opt-flick').classList.remove('selected');}
-}
+  // ===== ゲームオーバー =====
+  gameOver(){
+    speechSynthesis.cancel();clearTimeout(this.autoAdvanceTimer);this.stopCountdown();
+    this.speakId++;this.isSpeaking=false;this.isChoice=false;
+    const te=document.getElementById('game-text');
+    const ce=document.getElementById('choice-display');
+    ce.innerHTML='';
+    te.innerHTML='<span style="color:#ff0000;font-size:1.3em;">GAME OVER</span>';
 
-function initChk(){
-  var ct=document.getElementById('voice-check-btns');
-  var tl={ochipu:'ここは俺に任せとけ。まあ、様子見てからだけどな。',chibabu:'人間の体の60パーセントは水でできてるんだぜ。',yukkin:'よーし、ここは賭けだ。勝負だ勝負。',debucorn:'うまいもん食いてえなあ。特製ソースも持ってきたぜ。',nobun:'今日の潮の流れはいいな。大物の予感がするぜ。',yocchin:'いい話があるんだけどさ、ちょっと聞いてくれよ。',katopan:'だいじょうぶ、だいじょうぶ。たぶん治る。たぶんね。',edimarcy:'車はいつでも出せるぜ。安全運転がモットーだ。',narrator:'これはナレーションの音声テストです。悲鳴の方へ向かう。'};
-  for(var k in tl){
-    (function(key,line){
-      var b=document.createElement('button');b.className='check-btn';
-      b.textContent=CH[key].name||'ナレーター';
-      b.addEventListener('click',function(){speak(line,key);});
-      ct.appendChild(b);
-    })(k,tl[k]);
+    this.silence(3000,()=>{
+      this.speak('あなたは、やみに、のまれた。','ナレーション',()=>{
+        this.silence(2000,()=>{
+          this.speak('げーむおーばー。このしょうの、はじめから、やりなおします。','ナレーション',()=>{
+            this.silence(2000,()=>{
+              this.restartChapter();
+            });
+          },{});
+        });
+      },{});
+    });
+  },
+
+  restartChapter(){
+    if(this.currentChapter)this.startChapter(this.currentChapter);
+  },
+
+  // ===== セーブ/ロード =====
+  save(){localStorage.setItem('darkMysteryGame',JSON.stringify(this.saveData));},
+  loadSave(){const d=localStorage.getItem('darkMysteryGame');if(d)this.saveData=JSON.parse(d);},
+  clearSave(){
+    this.saveData={prologueCleared:false,chaptersCleared:[false,false,false,false,false,false,false],flags:{}};
+    localStorage.removeItem('darkMysteryGame');this.updateChapterList();
+  },
+
+  showScreen(name){
+    speechSynthesis.cancel();clearTimeout(this.autoAdvanceTimer);this.stopCountdown();
+    this.speakId++;this.isSpeaking=false;this.isChoice=false;
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const map={'menu':'menu-screen','option':'option-screen','prologue':'prologue-screen','game':'game-screen'};
+    const el=document.getElementById(map[name]);
+    if(el){el.classList.add('active');el.classList.add('fade-in');}
+    this.currentScreen=name;
+  },
+
+  updateChapterList(){
+    const list=document.getElementById('chapter-list');list.innerHTML='';
+    const names=['第一章：暗闇の始まり','第二章：疑惑の声','第三章：消えた記憶','第四章：裏切りの味','第五章：賭けの代償','第六章：真実の糸','第七章：闇の終焉'];
+    names.forEach((n,i)=>{
+      const btn=document.createElement('button');btn.className='menu-btn chapter-btn';btn.textContent=n;
+      if(i===0){if(!this.saveData.prologueCleared){btn.classList.add('locked');btn.style.display='none';}}
+      else{if(!this.saveData.chaptersCleared[i-1]){btn.classList.add('locked');btn.style.display='none';}}
+      if(this.saveData.chaptersCleared[i])btn.style.borderColor='#00cc66';
+      btn.addEventListener('click',()=>this.startChapter(i+1));list.appendChild(btn);
+    });
+  },
+
+  showChapterSelect(){document.getElementById('menu-buttons').style.display='none';document.getElementById('chapter-select').style.display='block';this.updateChapterList();},
+  hideChapterSelect(){document.getElementById('menu-buttons').style.display='block';document.getElementById('chapter-select').style.display='none';},
+
+  // ===== プロローグ =====
+  startPrologue(){this.showScreen('prologue');this.script=typeof PrologueScript!=='undefined'?PrologueScript:[];this.scriptIndex=0;this.runPrologueItem();},
+
+  runPrologueItem(){
+    if(this.scriptIndex>=this.script.length){this.endPrologue();return;}
+    const item=this.script[this.scriptIndex];
+    const ci=document.getElementById('char-image');const cn=document.getElementById('char-name-box');const sb=document.getElementById('subtitle-box');
+    if(item.character==='ナレーション'){ci.style.display='none';cn.style.display='none';}
+    else{const c=this.characters[item.character];if(c&&c.image){ci.src=c.image;ci.style.display='block';ci.onerror=()=>{ci.style.display='none';};}else ci.style.display='none';cn.textContent=item.character;cn.style.display='block';}
+    sb.textContent=item.displayText||item.text;sb.style.display='block';
+    this.speak(item.text,item.character,()=>{this.autoAdvanceTimer=setTimeout(()=>{this.scriptIndex++;this.runPrologueItem();},600);},{});
+  },
+
+  tapPrologue(){if(this.isSpeaking){this.skipCurrentSpeech();this.scriptIndex++;this.runPrologueItem();}},
+
+  endPrologue(){
+    this.saveData.prologueCleared=true;this.save();speechSynthesis.cancel();clearTimeout(this.autoAdvanceTimer);this.speakId++;
+    document.getElementById('char-image').style.display='none';document.getElementById('char-name-box').style.display='none';document.getElementById('subtitle-box').style.display='none';
+    this.showScreen('menu');this.showChapterSelect();
+  },
+
+  // ===== チャプター =====
+  startChapter(num){
+    this.currentChapter=num;
+    const scripts={1:typeof Chapter1Script!=='undefined'?Chapter1Script:[],2:typeof Chapter2Script!=='undefined'?Chapter2Script:[],3:typeof Chapter3Script!=='undefined'?Chapter3Script:[],4:typeof Chapter4Script!=='undefined'?Chapter4Script:[],5:typeof Chapter5Script!=='undefined'?Chapter5Script:[],6:typeof Chapter6Script!=='undefined'?Chapter6Script:[],7:typeof Chapter7Script!=='undefined'?Chapter7Script:[]};
+    this.script=scripts[num]||[];this.scriptIndex=0;this.showScreen('game');this.updateFlickGuide();this.runGameItem();
+  },
+
+  updateFlickGuide(){
+    const g=document.getElementById('flick-guide');
+    if(this.isMobile)g.innerHTML='タップ：スキップ ｜ フリック：選択肢<br>長押し：メニューに戻る';
+    else g.innerHTML='クリック/Enter：スキップ ｜ 矢印キー：選択肢<br>Escキー：メニューに戻る';
+  },
+
+  runGameItem(){
+    if(this.scriptIndex>=this.script.length){this.endChapter();return;}
+    const item=this.script[this.scriptIndex];
+    const te=document.getElementById('game-text');const ce=document.getElementById('choice-display');
+
+    if(item.type==='text'){
+      ce.innerHTML='';this.isChoice=false;te.innerHTML='';
+      if(item.character&&item.character!=='ナレーション')te.innerHTML=`<span style="color:#ff9933;font-size:0.85em;">${item.character}</span><br>${item.displayText||item.text}`;
+      else te.innerHTML=item.displayText||item.text;
+      const opts={};if(item.lying)opts.lying=true;if(item.pan!==undefined)opts.pan=item.pan;
+      this.speak(item.text,item.character||'ナレーション',()=>{this.autoAdvanceTimer=setTimeout(()=>{this.scriptIndex++;this.save();this.runGameItem();},500);},opts);
+
+    }else if(item.type==='silence'){
+      ce.innerHTML='';this.isChoice=false;
+      if(item.displayText)te.innerHTML=item.displayText;
+      this.silence(item.duration||2000,()=>{this.scriptIndex++;this.save();this.runGameItem();});
+
+    }else if(item.type==='choice'){
+      this.isChoice=true;this.choices=item.choices;
+      te.innerHTML=item.displayText||item.text||'選択してください';
+      let html='';const n=item.choices.length;
+      const dirs=n===2?['↑ うえ','↓ した']:['↑ うえ','↓ した','← ひだり','→ みぎ'];
+      item.choices.forEach((c,i)=>{html+=`<div class="choice-item" id="choice-${i}">${dirs[i]}：${c.displayText||c.text}</div>`;});
+      ce.innerHTML=html;
+      let rd='せんたくしてください。';
+      const dn=n===2?['うえ','した']:['うえ','した','ひだり','みぎ'];
+      item.choices.forEach((c,i)=>{rd+=`${dn[i]}、${c.text}。`;});
+
+      if(item.countdown){
+        this.speak(rd,'ナレーション',()=>{
+          this.startCountdown(item.countdown,()=>{
+            if(item.timeoutJump){const idx=this.script.findIndex(s=>s.label===item.timeoutJump);this.scriptIndex=idx>=0?idx:this.scriptIndex+1;this.runGameItem();}
+            else this.gameOver();
+          });
+        },{});
+      }else{
+        this.speak(rd,'ナレーション',()=>{},{});
+      }
+
+    }else if(item.type==='gameover'){
+      this.gameOver();return;
+
+    }else if(item.type==='jump'){
+      const idx=this.script.findIndex(s=>s.label===item.target);
+      this.scriptIndex=idx>=0?idx:this.scriptIndex+1;this.runGameItem();return;
+
+    }else if(item.type==='flag'){
+      this.saveData.flags[item.key]=item.value;this.save();this.scriptIndex++;this.runGameItem();return;
+
+    }else if(item.type==='checkflag'){
+      const val=this.saveData.flags[item.key];
+      if(val===item.value){const idx=this.script.findIndex(s=>s.label===item.target);this.scriptIndex=idx>=0?idx:this.scriptIndex+1;}
+      else{if(item.elseTarget){const idx=this.script.findIndex(s=>s.label===item.elseTarget);this.scriptIndex=idx>=0?idx:this.scriptIndex+1;}else this.scriptIndex++;}
+      this.runGameItem();return;
+
+    }else if(item.type==='end'){
+      this.endChapter();return;
+    }else{this.scriptIndex++;this.runGameItem();return;}
+  },
+
+  tapGame(){if(this.isChoice)return;if(this.isSpeaking){this.skipCurrentSpeech();this.scriptIndex++;this.save();this.runGameItem();}},
+
+  handleChoiceInput(dir){
+    if(!this.isChoice||!this.choices)return;
+    const n=this.choices.length;let ci=-1;
+    if(n===2){if(dir==='up')ci=0;else if(dir==='down')ci=1;}
+    else if(n===4){if(dir==='up')ci=0;else if(dir==='down')ci=1;else if(dir==='left')ci=2;else if(dir==='right')ci=3;}
+    else if(n===3){if(dir==='up')ci=0;else if(dir==='down')ci=1;else if(dir==='left')ci=2;}
+    if(ci<0||ci>=n)return;
+    speechSynthesis.cancel();clearTimeout(this.autoAdvanceTimer);this.stopCountdown();
+    this.speakId++;this.isSpeaking=false;this.isChoice=false;
+    document.querySelectorAll('.choice-item').forEach(el=>el.classList.remove('highlight'));
+    const el=document.getElementById(`choice-${ci}`);if(el)el.classList.add('highlight');
+    const chosen=this.choices[ci];
+    setTimeout(()=>{
+      document.getElementById('choice-display').innerHTML='';
+      if(chosen.jump){const idx=this.script.findIndex(s=>s.label===chosen.jump);this.scriptIndex=idx>=0?idx:this.scriptIndex+1;}
+      else this.scriptIndex++;
+      this.save();this.runGameItem();
+    },300);
+  },
+
+  endChapter(){
+    speechSynthesis.cancel();clearTimeout(this.autoAdvanceTimer);this.stopCountdown();this.speakId++;this.isSpeaking=false;
+    if(this.currentChapter){this.saveData.chaptersCleared[this.currentChapter-1]=true;this.save();}
+    this.showScreen('menu');this.showChapterSelect();
+  },
+
+  returnToMenu(){
+    speechSynthesis.cancel();clearTimeout(this.autoAdvanceTimer);this.stopCountdown();this.speakId++;this.isSpeaking=false;this.isChoice=false;
+    this.showScreen('menu');if(this.saveData.prologueCleared)this.showChapterSelect();else this.hideChapterSelect();
+  },
+
+  bindEvents(){
+    document.getElementById('start-btn').addEventListener('click',()=>{if(this.saveData.prologueCleared)this.showChapterSelect();else this.startPrologue();});
+    document.getElementById('option-btn').addEventListener('click',()=>this.showScreen('option'));
+    document.getElementById('option-back-btn').addEventListener('click',()=>{speechSynthesis.cancel();this.showScreen('menu');if(this.saveData.prologueCleared)this.showChapterSelect();});
+    document.getElementById('back-menu-btn').addEventListener('click',()=>this.hideChapterSelect());
+    document.getElementById('speech-speed').addEventListener('input',e=>{this.speechRate=parseFloat(e.target.value);document.getElementById('speed-val').textContent=this.speechRate.toFixed(2);});
+    document.getElementById('voice-select').addEventListener('change',e=>{this.selectedVoice=this.voices[parseInt(e.target.value)];});
+    document.getElementById('test-voice-btn').addEventListener('click',()=>{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance('これはテスト音声です。闇の居酒屋へようこそ。');if(this.selectedVoice)u.voice=this.selectedVoice;u.pitch=0.9;u.rate=this.speechRate;u.lang='ja-JP';speechSynthesis.speak(u);});
+    document.getElementById('clear-save-btn').addEventListener('click',()=>{if(confirm('セーブデータを削除しますか？')){this.clearSave();alert('削除しました。');}});
+    document.getElementById('prologue-tap-area').addEventListener('click',()=>{if(this.currentScreen==='prologue')this.tapPrologue();});
+
+    const fa=document.getElementById('flick-area');
+    fa.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];this.touchStartX=t.clientX;this.touchStartY=t.clientY;this.touchStartTime=Date.now();this.isLongPress=false;this.longPressTimer=setTimeout(()=>{this.isLongPress=true;this.returnToMenu();},1000);},{passive:false});
+    fa.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];const dx=t.clientX-this.touchStartX,dy=t.clientY-this.touchStartY;if(Math.sqrt(dx*dx+dy*dy)>20)clearTimeout(this.longPressTimer);},{passive:false});
+    fa.addEventListener('touchend',e=>{e.preventDefault();clearTimeout(this.longPressTimer);if(this.isLongPress)return;if(this.currentScreen!=='game')return;const t=e.changedTouches[0];const dx=t.clientX-this.touchStartX,dy=t.clientY-this.touchStartY;const dist=Math.sqrt(dx*dx+dy*dy);if(dist>40){if(Math.abs(dx)>Math.abs(dy))this.handleChoiceInput(dx>0?'right':'left');else this.handleChoiceInput(dy>0?'down':'up');}else this.tapGame();},{passive:false});
+    fa.addEventListener('click',e=>{if(this.currentScreen!=='game'||this.isMobile)return;this.tapGame();});
+    document.addEventListener('keydown',e=>{
+      if(this.currentScreen==='game'){switch(e.key){case'ArrowUp':this.handleChoiceInput('up');break;case'ArrowDown':this.handleChoiceInput('down');break;case'ArrowLeft':this.handleChoiceInput('left');break;case'ArrowRight':this.handleChoiceInput('right');break;case' ':case'Enter':this.tapGame();break;case'Escape':this.returnToMenu();break;}}
+      else if(this.currentScreen==='prologue'){if(e.key===' '||e.key==='Enter')this.tapPrologue();}
+    });
   }
-  document.getElementById('btn-check-touch').addEventListener('click',function(){settings.inputMode='touch';updOptUI();showGameScr(true);});
-  document.getElementById('btn-check-flick').addEventListener('click',function(){settings.inputMode='flick';updOptUI();showGameScr(true);});
-  document.getElementById('btn-check-save').addEventListener('click',function(){autoSave();speak('セーブ完了','narrator');});
-  document.getElementById('btn-check-load').addEventListener('click',function(){if(loadSave()){speak('ロード完了','narrator');}});
-  document.getElementById('btn-check-reset').addEventListener('click',function(){localStorage.clear();location.reload();});
-  document.getElementById('btn-check-back').addEventListener('click',showMenu);
-}
-
-async function init(){
-  await loadVoices();
-  loadSets();loadSave();
-  updOptUI();updSpd();
-  document.getElementById('btn-start').addEventListener('click',showChapterSelect);
-  document.getElementById('btn-option').addEventListener('click',function(){showScr('option-screen');});
-  document.getElementById('btn-syscheck').addEventListener('click',function(){showScr('check-screen');});
-  document.getElementById('btn-chapter-back').addEventListener('click',showMenu);
-  document.getElementById('btn-prologue').addEventListener('click',startPrologue);
-  for(var i=1;i<=7;i++){(function(n){document.getElementById('btn-ch'+n).addEventListener('click',function(){if(!this.classList.contains('locked'))startChapter('ch'+n);});})(i);}
-  document.getElementById('prologue-screen').addEventListener('click',function(){speechSynthesis.cancel();proIdx++;showProLine();});
-  initOpts();initGameBtns();initChk();
-  showMenu();
-}
-document.addEventListener('DOMContentLoaded',init);
+};
+window.addEventListener('DOMContentLoaded',()=>Game.init());
 </script>
-
+<script src="prologue.js"></script>
 <script src="chapter1.js"></script>
 <script src="chapter2.js"></script>
 <script src="chapter3.js"></script>
