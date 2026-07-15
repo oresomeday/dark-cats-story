@@ -6,11 +6,11 @@
 <title>闇の居酒屋 - 滝下の夜</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-body{background:#000;color:#fff;font-family:'Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo',sans-serif;overflow:hidden;width:100vw;height:100vh;touch-action:none}
+body{background:#000;color:#fff;font-family:'Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo',sans-serif;overflow:hidden;width:100vw;height:100vh}
 #game-container{width:100vw;height:100vh;position:relative;overflow:hidden}
 .screen{display:none;position:absolute;top:0;left:0;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center}
 .screen.active{display:flex}
-#menu-screen{background:linear-gradient(180deg,#0a0a0a 0%,#1a0a00 50%,#0a0a0a 100%)}
+#menu-screen{background:linear-gradient(180deg,#0a0a0a 0%,#1a0a00 50%,#0a0a0a 100%);z-index:10}
 .game-title{font-size:clamp(28px,6vw,52px);text-align:center;color:#ff6600;text-shadow:0 0 20px rgba(255,102,0,0.5),0 0 40px rgba(255,0,0,0.3);margin-bottom:40px;letter-spacing:4px;animation:titleGlow 3s ease-in-out infinite}
 .subtitle{font-size:clamp(14px,3vw,24px);color:#cc9966;letter-spacing:6px}
 @keyframes titleGlow{0%,100%{text-shadow:0 0 20px rgba(255,102,0,0.5),0 0 40px rgba(255,0,0,0.3)}50%{text-shadow:0 0 30px rgba(255,102,0,0.8),0 0 60px rgba(255,0,0,0.5)}}
@@ -23,18 +23,17 @@ body{background:#000;color:#fff;font-family:'Hiragino Kaku Gothic ProN','Yu Goth
 .menu-btn:disabled{opacity:0.3;cursor:not-allowed}
 .chapter-btn{width:260px}
 .chapter-btn.locked{opacity:0.15;pointer-events:none}
-#option-screen{background:#111;padding:20px;overflow-y:auto}
+#option-screen{background:#111;padding:20px;z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 #option-screen h2{margin-bottom:20px;color:#ff6600;font-size:28px}
 .option-group{margin:12px 0;text-align:center;width:90%;max-width:400px}
 .option-group label{display:block;margin-bottom:8px;font-size:16px;color:#ccc}
-.option-group input[type="range"]{width:100%;accent-color:#ff6600}
-.option-group select{width:100%;padding:8px;font-size:14px;background:#222;color:#fff;border:1px solid #555;border-radius:4px;margin-bottom:8px}
+.option-group input[type="range"]{width:100%;accent-color:#ff6600;touch-action:pan-x}
 .char-voice-list{width:90%;max-width:400px;margin:10px 0}
 .char-voice-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;margin:4px 0;background:#1a1a1a;border:1px solid #333;border-radius:6px}
 .char-voice-item span{font-size:14px;color:#ccc}
 .char-voice-item button{padding:6px 14px;font-size:13px;background:#333;color:#ff9933;border:1px solid #555;border-radius:4px;cursor:pointer;font-family:inherit}
 .char-voice-item button:hover{background:#555;border-color:#ff6600}
-#prologue-screen{background:#000}
+#prologue-screen{background:#000;z-index:10}
 #prologue-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#1a0a00 0%,#0d0d0d 100%)}
 #char-image-container{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);width:clamp(120px,30vw,200px);height:clamp(120px,30vw,200px);z-index:2}
 #char-image{width:100%;height:100%;object-fit:cover;border-radius:50%;border:3px solid #ff6600;display:none}
@@ -47,7 +46,7 @@ body{background:#000;color:#fff;font-family:'Hiragino Kaku Gothic ProN','Yu Goth
 #choice-display{position:relative;z-index:2;width:90%;max-width:400px;text-align:center;font-size:clamp(14px,3vw,18px);color:#ff9933;padding:10px;min-height:80px}
 .choice-item{margin:5px 0;padding:5px;color:#ff9933}
 .choice-item.highlight{color:#ffcc00;font-weight:bold;text-shadow:0 0 10px rgba(255,204,0,0.5)}
-#flick-area{position:absolute;bottom:0;left:0;width:100%;height:100%;z-index:5}
+#flick-area{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;display:none}
 #flick-guide{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:#666;font-size:clamp(11px,2.5vw,14px);text-align:center;line-height:1.6;pointer-events:none}
 #countdown-display{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;color:#ff0000;z-index:100;display:none;text-shadow:0 0 30px rgba(255,0,0,0.8);font-weight:bold}
 .fade-in{animation:fadeIn 0.5s ease-in}
@@ -73,12 +72,10 @@ body{background:#000;color:#fff;font-family:'Hiragino Kaku Gothic ProN','Yu Goth
   <div id="option-screen" class="screen">
     <h2>オプション</h2>
     <div class="option-group">
-      <label>音声速度: <span id="speed-val">1.0</span></label>
+      <label>音声速度: <span id="speed-val">1.00</span>倍</label>
       <input type="range" id="speech-speed" min="0.5" max="1.2" step="0.05" value="1.0">
     </div>
     <div class="option-group">
-      <label>音声選択:</label>
-      <select id="voice-select"></select>
       <button id="test-voice-btn" class="menu-btn small-btn">テスト再生</button>
     </div>
     <div class="option-group"><label>キャラクター音声確認:</label></div>
@@ -141,10 +138,10 @@ const Game={
       testLine:'うわっ、おれはいかないぞ。おまえがさきにいけよ。'},
     'ちばぶ':{image:'chiba.png',pitch:0.95,rate:0.85,volume:0.9,
       lyingPitch:0.85,lyingRate:0.75,
-      testLine:'にんげんののうは、やくせんよんひゃくぐらむあるらしいよ。'},
+      testLine:'にんげんののうはやくせんよんひゃくぐらむあるらしいよ。'},
     'ゆっきん':{image:'yuuki.png',pitch:1.05,rate:1.1,volume:1.0,
       lyingPitch:1.15,lyingRate:1.2,
-      testLine:'よし、かけようぜ。まけたやつがぜんいんぶんおごりな。'},
+      testLine:'よしかけようぜ。まけたやつがぜんいんぶんおごりな。'},
     'デブコーン':{image:'debu.png',pitch:0.55,rate:0.75,volume:1.0,
       lyingPitch:0.65,lyingRate:0.85,
       testLine:'おれのとくせいりょうりくってみろよ。たぶんおなかはこわさない。'},
@@ -187,8 +184,7 @@ const Game={
   detectTotalChapters(){
     let count=0;
     for(let i=1;i<=20;i++){
-      if(this.getChapterScript(i))count=i;
-      else break;
+      if(this.getChapterScript(i))count=i;else break;
     }
     this.totalChapters=Math.max(count,1);
   },
@@ -205,7 +201,7 @@ const Game={
   initVoices(){
     const load=()=>{
       this.voices=speechSynthesis.getVoices();
-      this.populateVoiceSelect();
+      this.selectedVoice=this.getHighQualityVoice();
       this.buildCharVoiceList();
     };
     speechSynthesis.onvoiceschanged=load;
@@ -226,21 +222,6 @@ const Game={
     ];
     for(const t of tests){const f=v.find(t);if(f)return f;}
     return v[0]||null;
-  },
-
-  populateVoiceSelect(){
-    const sel=document.getElementById('voice-select');
-    sel.innerHTML='';
-    const ja=this.voices.filter(v=>v.lang.startsWith('ja'));
-    const list=ja.length>0?ja:this.voices;
-    list.forEach(v=>{
-      const o=document.createElement('option');
-      o.value=this.voices.indexOf(v);
-      o.textContent=`${v.name} (${v.lang})`;
-      sel.appendChild(o);
-    });
-    const best=this.getHighQualityVoice();
-    if(best){this.selectedVoice=best;sel.value=this.voices.indexOf(best);}
   },
 
   buildCharVoiceList(){
@@ -431,6 +412,7 @@ const Game={
     const el=document.getElementById(map[name]);
     if(el){el.classList.add('active');el.classList.add('fade-in');}
     this.currentScreen=name;
+    document.getElementById('flick-area').style.display=name==='game'?'block':'none';
   },
 
   updateChapterList(){
@@ -535,7 +517,6 @@ const Game={
     if(!item.type){this.scriptIndex++;this.runGameItem();return;}
     const te=document.getElementById('game-text');
     const ce=document.getElementById('choice-display');
-
     switch(item.type){
       case 'text':{
         ce.innerHTML='';this.isChoice=false;this.choices=null;
@@ -648,9 +629,6 @@ const Game={
     document.getElementById('speech-speed').addEventListener('input',e=>{
       this.speechRate=parseFloat(e.target.value);
       document.getElementById('speed-val').textContent=this.speechRate.toFixed(2);
-    });
-    document.getElementById('voice-select').addEventListener('change',e=>{
-      const idx=parseInt(e.target.value);if(this.voices[idx])this.selectedVoice=this.voices[idx];
     });
     document.getElementById('test-voice-btn').addEventListener('click',()=>{
       speechSynthesis.cancel();
