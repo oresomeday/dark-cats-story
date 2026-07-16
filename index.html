@@ -23,16 +23,18 @@ body{background:#000;color:#fff;font-family:'Hiragino Kaku Gothic ProN','Yu Goth
 .menu-btn:disabled{opacity:0.3;cursor:not-allowed}
 .chapter-btn{width:260px}
 .chapter-btn.locked{opacity:0.15;pointer-events:none}
-#option-screen{background:#111;padding:20px;z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
-#option-screen h2{margin-bottom:20px;color:#ff6600;font-size:28px}
-.option-group{margin:12px 0;text-align:center;width:90%;max-width:400px}
+#option-screen{background:#111;z-index:10;display:none;position:absolute;top:0;left:0;width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;flex-direction:column;align-items:center;justify-content:flex-start;padding:40px 20px 60px 20px}
+#option-screen.active{display:flex}
+#option-screen h2{margin-bottom:20px;color:#ff6600;font-size:28px;flex-shrink:0}
+.option-group{margin:12px 0;text-align:center;width:90%;max-width:400px;flex-shrink:0}
 .option-group label{display:block;margin-bottom:8px;font-size:16px;color:#ccc}
-.option-group input[type="range"]{width:100%;accent-color:#ff6600;touch-action:pan-x}
-.char-voice-list{width:90%;max-width:400px;margin:10px 0}
+.option-group input[type="range"]{width:100%;accent-color:#ff6600;touch-action:pan-x;height:40px}
+.char-voice-list{width:90%;max-width:400px;margin:10px 0;flex-shrink:0}
 .char-voice-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;margin:4px 0;background:#1a1a1a;border:1px solid #333;border-radius:6px}
 .char-voice-item span{font-size:14px;color:#ccc}
 .char-voice-item button{padding:6px 14px;font-size:13px;background:#333;color:#ff9933;border:1px solid #555;border-radius:4px;cursor:pointer;font-family:inherit}
 .char-voice-item button:hover{background:#555;border-color:#ff6600}
+.option-spacer{height:30px;flex-shrink:0}
 #prologue-screen{background:#000;z-index:10}
 #prologue-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#1a0a00 0%,#0d0d0d 100%)}
 #char-image-container{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);width:clamp(120px,30vw,200px);height:clamp(120px,30vw,200px);z-index:2}
@@ -70,6 +72,7 @@ body{background:#000;color:#fff;font-family:'Hiragino Kaku Gothic ProN','Yu Goth
     </div>
   </div>
   <div id="option-screen" class="screen">
+    <div class="option-spacer"></div>
     <h2>オプション</h2>
     <div class="option-group">
       <label>音声速度: <span id="speed-val">1.00</span>倍</label>
@@ -84,6 +87,7 @@ body{background:#000;color:#fff;font-family:'Hiragino Kaku Gothic ProN','Yu Goth
       <button id="clear-save-btn" class="menu-btn small-btn danger">セーブデータ削除</button>
     </div>
     <button id="option-back-btn" class="menu-btn" style="margin-top:15px;">戻る</button>
+    <div class="option-spacer"></div>
   </div>
   <div id="prologue-screen" class="screen">
     <div id="prologue-bg"></div>
@@ -114,6 +118,7 @@ const Game={
   selectedVoice:null,
   speechRate:1.0,
   totalChapters:7,
+  voicesLoaded:false,
   saveData:{
     prologueCleared:false,
     chaptersCleared:[],
@@ -194,25 +199,27 @@ const Game={
     this.loadSave();
     this.initVoices();
     this.bindEvents();
-    this.showScreen('menu');
+    this.currentScreen='menu';
     if(this.saveData.prologueCleared)this.showChapterSelect();
   },
 
   initVoices(){
     const load=()=>{
-      this.voices=speechSynthesis.getVoices();
+      const v=speechSynthesis.getVoices();
+      if(v.length===0)return;
+      if(this.voicesLoaded)return;
+      this.voicesLoaded=true;
+      this.voices=v;
       this.selectedVoice=this.getHighQualityVoice();
       this.buildCharVoiceList();
     };
     speechSynthesis.onvoiceschanged=load;
-    setTimeout(load,100);
-    setTimeout(load,500);
+    setTimeout(load,200);
     setTimeout(load,1000);
-    load();
   },
 
   getHighQualityVoice(){
-    const v=speechSynthesis.getVoices();
+    const v=this.voices;
     const tests=[
       vo=>vo.lang.startsWith('ja')&&vo.name.includes('Google'),
       vo=>vo.lang.startsWith('ja')&&vo.name.includes('Premium'),
@@ -407,12 +414,21 @@ const Game={
   showScreen(name){
     speechSynthesis.cancel();clearTimeout(this.autoAdvanceTimer);this.stopCountdown();
     this.speakId++;this.isSpeaking=false;this.isChoice=false;this.choices=null;
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s=>{
+      s.classList.remove('active');
+      s.classList.remove('fade-in');
+    });
     const map={'menu':'menu-screen','option':'option-screen','prologue':'prologue-screen','game':'game-screen'};
     const el=document.getElementById(map[name]);
-    if(el){el.classList.add('active');el.classList.add('fade-in');}
+    if(el){
+      el.classList.add('active');
+      if(name!=='menu')el.classList.add('fade-in');
+    }
     this.currentScreen=name;
     document.getElementById('flick-area').style.display=name==='game'?'block':'none';
+    if(name==='option'){
+      document.getElementById('option-screen').scrollTop=0;
+    }
   },
 
   updateChapterList(){
